@@ -1,0 +1,13 @@
+# SSL Certificates
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+
+# Logs
+logs/*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*~

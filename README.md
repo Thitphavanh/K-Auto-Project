@@ -159,6 +159,7 @@ docker-compose exec web python manage.py <command>
 ```
 
 Examples:
+
 ```bash
 # Run migrations
 docker-compose exec web python manage.py migrate
@@ -188,6 +189,7 @@ docker-compose exec redis redis-cli
 ### Connect from external tools
 
 **PostgreSQL** (DBeaver, pgAdmin, etc.):
+
 ```
 Host: localhost
 Port: 54320
@@ -197,6 +199,7 @@ Password: postgres
 ```
 
 **Redis** (Redis Desktop Manager, RedisInsight, etc.):
+
 ```
 Host: localhost
 Port: 6379
@@ -225,7 +228,7 @@ ws://localhost:8000/ws/inventory/
 
 ## 📁 Project Structure
 
-```
+````
 autoparts/
 ├── config/               # Project configuration
 │   ├── settings/        # Settings split (base, dev, prod)
@@ -319,7 +322,7 @@ lsof -ti:8000 | xargs kill -9
 # Or use different port in docker-compose.yml
 ports:
   - "8001:8000"
-```
+````
 
 ### Database connection error
 
@@ -352,4 +355,8 @@ MIT License
 ## 📞 Support
 
 For support, email admin@kauto.com or create an issue in the repository.
+
+```
+
+  
 ```
