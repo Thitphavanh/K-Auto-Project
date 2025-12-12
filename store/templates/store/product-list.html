@@ -1,0 +1,757 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ລາຍການສິນຄ້າທັງໝົດ - K-Auto{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+
+    .dark-mode .page-header {
+        background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .dark-mode .page-title {
+        color: #000000;
+    }
+
+    .page-subtitle {
+        text-align: center;
+        color: rgba(255,255,255,0.8);
+        font-size: 1.125rem;
+    }
+
+    .dark-mode .page-subtitle {
+        color: rgba(0,0,0,0.8);
+    }
+
+    /* Minimalist Filter Section */
+    .filter-section {
+        background: #ffffff;
+        border-radius: 0;
+        padding: 40px;
+        box-shadow: none;
+        border: 2px solid #000000;
+        margin-bottom: 50px;
+    }
+
+    .dark-mode .filter-section {
+        background: #000000;
+        border-color: #ffffff;
+        box-shadow: none;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #000000;
+        margin-bottom: 8px;
+    }
+
+    .dark-mode .filter-label {
+        color: #ffffff;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 14px 20px;
+        border: 2px solid #000000;
+        border-radius: 0;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: #ffffff;
+        color: #000000;
+        font-weight: 500;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: inset 0 0 0 2px #000000;
+    }
+
+    .search-input::placeholder {
+        color: #999999;
+    }
+
+    .dark-mode .search-input {
+        background: #000000;
+        border-color: #ffffff;
+        color: #ffffff;
+    }
+
+    .dark-mode .search-input:focus {
+        border-color: #ffffff;
+        box-shadow: inset 0 0 0 2px #ffffff;
+    }
+
+    .dark-mode .search-input::placeholder {
+        color: #666666;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 14px 20px;
+        border: 2px solid #000000;
+        border-radius: 0;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: #ffffff;
+        color: #000000;
+        cursor: pointer;
+        font-weight: 500;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000000' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        padding-right: 40px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: inset 0 0 0 2px #000000;
+    }
+
+    .dark-mode .filter-select {
+        background: #000000;
+        border-color: #ffffff;
+        color: #ffffff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    }
+
+    .dark-mode .filter-select:focus {
+        border-color: #ffffff;
+        box-shadow: inset 0 0 0 2px #ffffff;
+    }
+
+    .filter-btn {
+        padding: 14px 40px;
+        background: #000000;
+        color: #ffffff;
+        border: 2px solid #000000;
+        border-radius: 0;
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+        background: #ffffff;
+        color: #000000;
+        transform: translateY(-2px);
+    }
+
+    .filter-btn:active {
+        transform: translateY(0);
+    }
+
+    .dark-mode .filter-btn {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .filter-btn:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+
+    .reset-btn {
+        padding: 14px 40px;
+        background: transparent;
+        color: #000000;
+        border: 2px solid #000000;
+        border-radius: 0;
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .reset-btn:hover {
+        background: #000000;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .reset-btn:active {
+        transform: translateY(0);
+    }
+
+    .dark-mode .reset-btn {
+        background: transparent;
+        color: #ffffff;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .reset-btn:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .filter-divider {
+        height: 2px;
+        background: #000000;
+        margin: 30px 0;
+    }
+
+    .dark-mode .filter-divider {
+        background: #ffffff;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        border-color: #000000;
+    }
+
+    .dark-mode .product-card {
+        background: #1a1a1a;
+        box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+        border-color: #333333;
+    }
+
+    .dark-mode .product-card:hover {
+        box-shadow: 0 4px 16px rgba(255,255,255,0.12);
+        border-color: #ffffff;
+    }
+
+    .product-image-wrapper {
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+        background: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dark-mode .product-image-wrapper {
+        background: #2a2a2a;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-no-image {
+        font-size: 4rem;
+        color: #d1d5db;
+    }
+
+    .product-content {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-category {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #f0f0f0;
+        color: #000000;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-bottom: 12px;
+        width: fit-content;
+    }
+
+    .dark-mode .product-category {
+        background: #2a2a2a;
+        color: #ffffff;
+    }
+
+    .product-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 10px;
+        min-height: 50px;
+    }
+
+    .dark-mode .product-name {
+        color: #f9fafb;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 10px;
+        margin-top: auto;
+    }
+
+    .dark-mode .product-price {
+        color: #ffffff;
+    }
+
+    .product-stock {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 15px;
+    }
+
+    .dark-mode .product-stock {
+        color: #9ca3af;
+    }
+
+    .stock-available {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .stock-low {
+        color: #f59e0b;
+        font-weight: 600;
+    }
+
+    .stock-out {
+        color: #ef4444;
+        font-weight: 600;
+    }
+
+    .product-detail-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        background: #000000;
+        color: #ffffff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid #000000;
+    }
+
+    .product-detail-btn:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .dark-mode .product-detail-btn {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .product-detail-btn:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 40px;
+    }
+
+    .pagination-btn {
+        padding: 10px 20px;
+        background: white;
+        color: #000000;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .pagination-btn:hover {
+        border-color: #000000;
+    }
+
+    .pagination-btn.active {
+        background: #000000;
+        color: #ffffff;
+        border-color: #000000;
+    }
+
+    .dark-mode .pagination-btn {
+        background: #1a1a1a;
+        color: #ffffff;
+        border-color: #444444;
+    }
+
+    .dark-mode .pagination-btn:hover {
+        border-color: #ffffff;
+    }
+
+    .dark-mode .pagination-btn.active {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .pagination-info {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .dark-mode .pagination-info {
+        color: #9ca3af;
+    }
+
+    .results-count {
+        font-size: 1.125rem;
+        color: #6b7280;
+        margin-bottom: 20px;
+    }
+
+    .dark-mode .results-count {
+        color: #9ca3af;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .no-results-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+    }
+
+    .no-results-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .dark-mode .no-results-title {
+        color: #f9fafb;
+    }
+
+    .no-results-text {
+        color: #6b7280;
+    }
+
+    .dark-mode .no-results-text {
+        color: #9ca3af;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container mx-auto px-4">
+        <h1 class="page-title" data-translate="products_list_title">ລາຍການສິນຄ້າທັງໝົດ</h1>
+        <p class="page-subtitle" data-translate="products_list_subtitle">ຄົ້ນຫາ ແລະ ເລືອກສິນຄ້າທີ່ທ່ານຕ້ອງການ</p>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" action="{% url 'product-list' %}">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Search -->
+                <div class="lg:col-span-2">
+                    <label class="filter-label" data-translate="label_search">🔍 ຄົ້ນຫາສິນຄ້າ</label>
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ search_query }}"
+                        placeholder="ພິມຊື່ສິນຄ້າ ຫຼື ລະຫັດບາໂຄດ..."
+                        class="search-input"
+                        data-translate-placeholder="search_placeholder"
+                    >
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <label class="filter-label" data-translate="label_category">📦 ໝວດໝູ່</label>
+                    <select name="category" class="filter-select">
+                        <option value="" data-translate="all_categories">ທັງໝົດ</option>
+                        {% for category in categories %}
+                            <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Brand Filter -->
+                <div>
+                    <label class="filter-label" data-translate="label_brand">🏷️ ຍີ່ຫໍ້</label>
+                    <select name="brand" class="filter-select">
+                        <option value="" data-translate="all_brands">ທັງໝົດ</option>
+                        {% for brand in brands %}
+                            <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>
+                                {{ brand.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Sort and Actions -->
+            <div class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1" style="min-width: 250px;">
+                    <label class="filter-label" data-translate="label_sort">⇅ ຈັດລຽງ</label>
+                    <select name="sort" class="filter-select">
+                        <option value="-id" {% if sort_by == '-id' %}selected{% endif %} data-translate="sort_latest">ລ່າສຸດກ່ອນ</option>
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %} data-translate="sort_name_asc">ຊື່ A-Z</option>
+                        <option value="-name" {% if sort_by == '-name' %}selected{% endif %} data-translate="sort_name_desc">ຊື່ Z-A</option>
+                        <option value="sell_price" {% if sort_by == 'sell_price' %}selected{% endif %} data-translate="sort_price_asc">ລາຄາຕ່ຳ-ສູງ</option>
+                        <option value="-sell_price" {% if sort_by == '-sell_price' %}selected{% endif %} data-translate="sort_price_desc">ລາຄາສູງ-ຕ່ຳ</option>
+                        <option value="-quantity" {% if sort_by == '-quantity' %}selected{% endif %} data-translate="sort_stock">ສະຕັອກຫຼາຍ</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="filter-btn" data-translate="apply_filter">ຄົ້ນຫາ</button>
+                <a href="{% url 'product-list' %}" class="reset-btn" data-translate="reset_filter">ລ້າງ</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-count">
+        <span data-translate="showing_results">ສະແດງ</span>
+        <strong>{{ products.paginator.count }}</strong>
+        <span data-translate="results_found">ລາຍການ</span>
+    </div>
+
+    <!-- Products Grid -->
+    {% if products %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-image-wrapper">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                    <div class="product-no-image">📦</div>
+                {% endif %}
+            </div>
+
+            <div class="product-content">
+                <div class="flex gap-2 flex-wrap">
+                    {% if product.category %}
+                        <span class="product-category">{{ product.category }}</span>
+                    {% endif %}
+                    {% if product.brand %}
+                        <span class="product-category">{{ product.brand.name }}</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="product-name">{{ product.name }}</h3>
+
+                <div class="product-price">{{ product.sell_price|floatformat:0 }} <span data-translate="currency">ກີບ</span></div>
+
+                <div class="product-stock">
+                    <span data-translate="stock">ສະຕັອກ:</span>
+                    {% if product.quantity > 10 %}
+                        <span class="stock-available">{{ product.quantity }} <span data-translate="units">ຊິ້ນ</span></span>
+                    {% elif product.quantity > 0 %}
+                        <span class="stock-low">{{ product.quantity }} <span data-translate="units">ຊິ້ນ</span></span>
+                    {% else %}
+                        <span class="stock-out" data-translate="out_of_stock">ໝົດສະຕັອກ</span>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'product-detail' product.slug %}" class="product-detail-btn" data-translate="view_details">
+                    ເບິ່ງລາຍລະອຽດ
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if products.has_other_pages %}
+    <div class="pagination">
+        {% if products.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+               class="pagination-btn" data-translate="first">ໜ້າທຳອິດ</a>
+            <a href="?page={{ products.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+               class="pagination-btn" data-translate="previous">ກ່ອນໜ້າ</a>
+        {% endif %}
+
+        <span class="pagination-info">
+            <span data-translate="page">ໜ້າ</span> {{ products.number }} <span data-translate="of">ຈາກ</span> {{ products.paginator.num_pages }}
+        </span>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+               class="pagination-btn" data-translate="next">ຖັດໄປ</a>
+            <a href="?page={{ products.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+               class="pagination-btn" data-translate="last">ໜ້າສຸດທ້າຍ</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Results -->
+    <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3 class="no-results-title" data-translate="no_results_title">ບໍ່ພົບສິນຄ້າທີ່ຄົ້ນຫາ</h3>
+        <p class="no-results-text" data-translate="no_results_text">ກະລຸນາລອງຄົ້ນຫາດ້ວຍຄຳອື່ນ ຫຼື ລ້າງການກັ່ນຕອງ</p>
+        <a href="{% url 'product-list' %}" class="filter-btn mt-4 inline-block" data-translate="view_all_products">ເບິ່ງສິນຄ້າທັງໝົດ</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add translations for Product List page
+    if (window.translations) {
+        window.translations.lo = {
+            ...window.translations.lo,
+            products_list_title: 'ລາຍການສິນຄ້າທັງໝົດ',
+            products_list_subtitle: 'ຄົ້ນຫາ ແລະ ເລືອກສິນຄ້າທີ່ທ່ານຕ້ອງການ',
+            label_search: '🔍 ຄົ້ນຫາສິນຄ້າ',
+            label_category: '📦 ໝວດໝູ່',
+            label_brand: '🏷️ ຍີ່ຫໍ້',
+            label_sort: '⇅ ຈັດລຽງ',
+            search_placeholder: 'ພິມຊື່ສິນຄ້າ ຫຼື ລະຫັດບາໂຄດ...',
+            all_categories: 'ທັງໝົດ',
+            all_brands: 'ທັງໝົດ',
+            sort_latest: 'ລ່າສຸດກ່ອນ',
+            sort_name_asc: 'ຊື່ A-Z',
+            sort_name_desc: 'ຊື່ Z-A',
+            sort_price_asc: 'ລາຄາຕ່ຳ-ສູງ',
+            sort_price_desc: 'ລາຄາສູງ-ຕ່ຳ',
+            sort_stock: 'ສະຕັອກຫຼາຍ',
+            apply_filter: 'ຄົ້ນຫາ',
+            reset_filter: 'ລ້າງ',
+            showing_results: 'ສະແດງ',
+            results_found: 'ລາຍການ',
+            view_details: 'ເບິ່ງລາຍລະອຽດ',
+            currency: 'ກີບ',
+            stock: 'ສະຕັອກ:',
+            units: 'ຊິ້ນ',
+            out_of_stock: 'ໝົດສະຕັອກ',
+            first: 'ໜ້າທຳອິດ',
+            previous: 'ກ່ອນໜ້າ',
+            page: 'ໜ້າ',
+            of: 'ຈາກ',
+            next: 'ຖັດໄປ',
+            last: 'ໜ້າສຸດທ້າຍ',
+            no_results_title: 'ບໍ່ພົບສິນຄ້າທີ່ຄົ້ນຫາ',
+            no_results_text: 'ກະລຸນາລອງຄົ້ນຫາດ້ວຍຄຳອື່ນ ຫຼື ລ້າງການກັ່ນຕອງ',
+            view_all_products: 'ເບິ່ງສິນຄ້າທັງໝົດ'
+        };
+
+        window.translations.th = {
+            ...window.translations.th,
+            products_list_title: 'รายการสินค้าทั้งหมด',
+            products_list_subtitle: 'ค้นหาและเลือกสินค้าที่คุณต้องการ',
+            label_search: '🔍 ค้นหาสินค้า',
+            label_category: '📦 หมวดหมู่',
+            label_brand: '🏷️ ยี่ห้อ',
+            label_sort: '⇅ เรียงลำดับ',
+            search_placeholder: 'พิมพ์ชื่อสินค้า หรือ บาร์โค้ด...',
+            all_categories: 'ทั้งหมด',
+            all_brands: 'ทั้งหมด',
+            sort_latest: 'ล่าสุดก่อน',
+            sort_name_asc: 'ชื่อ A-Z',
+            sort_name_desc: 'ชื่อ Z-A',
+            sort_price_asc: 'ราคาต่ำ-สูง',
+            sort_price_desc: 'ราคาสูง-ต่ำ',
+            sort_stock: 'สต็อกมาก',
+            apply_filter: 'ค้นหา',
+            reset_filter: 'ล้าง',
+            showing_results: 'แสดง',
+            results_found: 'รายการ',
+            view_details: 'ดูรายละเอียด',
+            currency: 'บาท',
+            stock: 'สต็อก:',
+            units: 'ชิ้น',
+            out_of_stock: 'สินค้าหมด',
+            first: 'หน้าแรก',
+            previous: 'ก่อนหน้า',
+            page: 'หน้า',
+            of: 'จาก',
+            next: 'ถัดไป',
+            last: 'หน้าสุดท้าย',
+            no_results_title: 'ไม่พบสินค้าที่ค้นหา',
+            no_results_text: 'กรุณาลองค้นหาด้วยคำอื่น หรือล้างตัวกรอง',
+            view_all_products: 'ดูสินค้าทั้งหมด'
+        };
+
+        window.translations.en = {
+            ...window.translations.en,
+            products_list_title: 'All Products',
+            products_list_subtitle: 'Search and select the products you need',
+            label_search: '🔍 Search',
+            label_category: '📦 Category',
+            label_brand: '🏷️ Brand',
+            label_sort: '⇅ Sort By',
+            search_placeholder: 'Type product name or barcode...',
+            all_categories: 'All',
+            all_brands: 'All',
+            sort_latest: 'Latest First',
+            sort_name_asc: 'Name A-Z',
+            sort_name_desc: 'Name Z-A',
+            sort_price_asc: 'Price Low-High',
+            sort_price_desc: 'Price High-Low',
+            sort_stock: 'Most Stock',
+            apply_filter: 'Search',
+            reset_filter: 'Clear',
+            showing_results: 'Showing',
+            results_found: 'results',
+            view_details: 'View Details',
+            currency: 'LAK',
+            stock: 'Stock:',
+            units: 'units',
+            out_of_stock: 'Out of Stock',
+            first: 'First',
+            previous: 'Previous',
+            page: 'Page',
+            of: 'of',
+            next: 'Next',
+            last: 'Last',
+            no_results_title: 'No Products Found',
+            no_results_text: 'Please try searching with different keywords or clear filters',
+            view_all_products: 'View All Products'
+        };
+    }
+</script>
+{% endblock %}

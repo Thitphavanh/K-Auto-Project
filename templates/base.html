@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ current_language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}K-Auto{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Noto Sans Lao', 'Noto Sans Thai', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        .dark-mode .bg-white {
+            background-color: #1a1a1a !important;
+        }
+
+        .dark-mode .text-gray-900 {
+            color: #ffffff !important;
+        }
+
+        .dark-mode .text-gray-600 {
+            color: #a0a0a0 !important;
+        }
+
+        .dark-mode .border-gray-200 {
+            border-color: #333333 !important;
+        }
+
+        .dark-mode .hover\:bg-gray-50:hover {
+            background-color: #2a2a2a !important;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Include Navbar -->
+    {% include 'includes/navbar.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Include Footer -->
+    {% include 'includes/footer.html' %}
+
+    <!-- Language Switcher JavaScript -->
+    <script src="{% static 'js/language-switcher.js' %}"></script>
+
+    <!-- WebSocket Client for Real-time Updates -->
+    <script src="{% static 'js/websocket-client.js' %}"></script>
+
+    <!-- Price Formatter (Format numbers with comma separator) -->
+    <script src="{% static 'js/price-formatter.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

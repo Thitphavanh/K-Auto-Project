@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ product.name }} - K-Auto Parts{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-container {
+        max-width: 1200px;
+        margin: 40px auto;
+    }
+
+    .product-image-container {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dark-mode .product-image-container {
+        background: #1a1a1a;
+        box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+        border-color: #333333;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 500px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .product-info-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+    }
+
+    .dark-mode .product-info-card {
+        background: #1a1a1a;
+        box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+        border-color: #333333;
+    }
+
+    .product-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 15px;
+    }
+
+    .dark-mode .product-title {
+        color: #f9fafb;
+    }
+
+    .product-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 20px;
+    }
+
+    .dark-mode .product-price {
+        color: #ffffff;
+    }
+
+    .product-category {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #f0f0f0;
+        color: #000000;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    .dark-mode .product-category {
+        background: #2a2a2a;
+        color: #ffffff;
+    }
+
+    .product-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .dark-mode .product-info-row {
+        border-bottom-color: #333333;
+    }
+
+    .info-label {
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .dark-mode .info-value {
+        color: #f9fafb;
+    }
+
+    .stock-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .stock-available {
+        background: #f0f0f0;
+        color: #000000;
+        border: 2px solid #000000;
+    }
+
+    .stock-low {
+        background: #f0f0f0;
+        color: #000000;
+        border: 2px solid #000000;
+    }
+
+    .stock-out {
+        background: #f0f0f0;
+        color: #000000;
+        border: 2px solid #000000;
+    }
+
+    .dark-mode .stock-available,
+    .dark-mode .stock-low,
+    .dark-mode .stock-out {
+        background: #1a1a1a;
+        color: #ffffff;
+        border-color: #ffffff;
+    }
+
+    .btn-back {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #000000;
+        color: #ffffff;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid #000000;
+    }
+
+    .btn-back:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .dark-mode .btn-back {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .btn-back:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+
+    .no-image {
+        width: 100%;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9fafb;
+        border-radius: 8px;
+        color: #9ca3af;
+        font-size: 3rem;
+    }
+
+    .dark-mode .no-image {
+        background: #2a2a2a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail-container">
+    <div class="mb-6">
+        <a href="{% url 'home' %}" class="btn-back" data-translate="back_to_home">
+            ← ກັບໄປໜ້າຫຼັກ
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Product Image -->
+        <div class="product-image-container">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+            {% else %}
+                <div class="no-image">
+                    📦
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info-card">
+            <div class="flex gap-2 mb-4">
+                {% if product.category %}
+                    <span class="product-category">{{ product.category }}</span>
+                {% endif %}
+                {% if product.brand %}
+                    <span class="product-category">{{ product.brand.name }}</span>
+                {% endif %}
+            </div>
+
+            <h1 class="product-title">{{ product.name }}</h1>
+
+            {% if product.sell_price %}
+            <div class="product-price">
+                <span class="price-amount">{{ product.sell_price|floatformat:0 }}</span>
+                <span class="price-currency" data-translate="price_label">ກີບ</span>
+            </div>
+            {% else %}
+            <div class="product-price">
+                <span class="price-amount" data-translate="price_not_set">ລາຄາຍັງບໍ່ໄດ້ກຳນົດ</span>
+            </div>
+            {% endif %}
+
+            <!-- Product Details -->
+            <div class="space-y-0">
+                <div class="product-info-row">
+                    <span class="info-label" data-translate="barcode">ລະຫັດບາໂຄດ</span>
+                    <span class="info-value">{{ product.barcode }}</span>
+                </div>
+
+                <div class="product-info-row">
+                    <span class="info-label" data-translate="stock_status">ສະຖານະສະຕັອກ</span>
+                    <span class="info-value">
+                        {% if product.quantity > 10 %}
+                            <span class="stock-badge stock-available" data-translate="in_stock">✓ ມີສິນຄ້າ</span>
+                        {% elif product.quantity > 0 %}
+                            <span class="stock-badge stock-low" data-translate="low_stock">⚠ ໃກ້ໝົດ</span>
+                        {% else %}
+                            <span class="stock-badge stock-out" data-translate="out_of_stock">✕ ໝົດສິນຄ້າ</span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="product-info-row">
+                    <span class="info-label" data-translate="quantity_available">ຈຳນວນທີ່ມີ</span>
+                    <span class="info-value">{{ product.quantity }} ຊິ້ນ</span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            {% if product.description %}
+            <div class="mt-8 pt-8 border-t border-gray-200">
+                <h3 class="text-lg font-bold text-gray-900 mb-4" data-translate="description">ລາຍລະອຽດ</h3>
+                <p class="text-gray-600 leading-relaxed">{{ product.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add translations for Product Detail page
+    if (window.translations) {
+        window.translations.lo = {
+            ...window.translations.lo,
+            back_to_home: '← ກັບໄປໜ້າຫຼັກ',
+            price_label: 'ກີບ',
+            barcode: 'ລະຫັດບາໂຄດ',
+            stock_status: 'ສະຖານະສະຕັອກ',
+            in_stock: '✓ ມີສິນຄ້າ',
+            low_stock: '⚠ ໃກ້ໝົດ',
+            out_of_stock: '✕ ໝົດສິນຄ້າ',
+            quantity_available: 'ຈຳນວນທີ່ມີ',
+            description: 'ລາຍລະອຽດ',
+            price_not_set: 'ລາຄາຍັງບໍ່ໄດ້ກຳນົດ'
+        };
+
+        window.translations.th = {
+            ...window.translations.th,
+            back_to_home: '← กลับไปหน้าแรก',
+            price_label: 'บาท',
+            barcode: 'รหัสบาร์โค้ด',
+            stock_status: 'สถานะสต็อก',
+            in_stock: '✓ มีสินค้า',
+            low_stock: '⚠ ใกล้หมด',
+            out_of_stock: '✕ หมดสินค้า',
+            quantity_available: 'จำนวนที่มี',
+            description: 'รายละเอียด',
+            price_not_set: 'ราคายังไม่ได้กำหนด'
+        };
+
+        window.translations.en = {
+            ...window.translations.en,
+            back_to_home: '← Back to Home',
+            price_label: 'LAK',
+            barcode: 'Barcode',
+            stock_status: 'Stock Status',
+            in_stock: '✓ In Stock',
+            low_stock: '⚠ Low Stock',
+            out_of_stock: '✕ Out of Stock',
+            quantity_available: 'Available Quantity',
+            description: 'Description',
+            price_not_set: 'Price not set'
+        };
+    }
+</script>
+{% endblock %}

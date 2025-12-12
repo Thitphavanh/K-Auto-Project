@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ແດັສບອດ - K-Auto Parts{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .dark-mode .stat-card {
+        background: #1a1a1a;
+        box-shadow: 0 1px 3px rgba(255,255,255,0.1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    }
+
+    .stat-title {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 8px;
+    }
+
+    .dark-mode .stat-title {
+        color: #9ca3af;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .dark-mode .stat-value {
+        color: #f9fafb;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 10px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .dark-mode .chart-container {
+        background: #1a1a1a;
+        box-shadow: 0 1px 3px rgba(255,255,255,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900" data-translate="dashboard">ແດັສບອດ</h1>
+    <p class="text-gray-600 mt-2" data-translate="welcome">ຍິນດີຕ້ອນຮັບສູ່ລະບົບຄຸ້ມຄອງອາໄຫຼ່ລົດ</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Daily Sales -->
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="stat-title" data-translate="daily_sales">ຍອດຂາຍວັນນີ້</p>
+                <p class="stat-value text-green-600">{{ daily_sales|floatformat:0|default:0 }}</p>
+                <p class="text-sm text-gray-500">ກີບ</p>
+            </div>
+            <div class="text-green-600">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Orders -->
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="stat-title" data-translate="daily_orders">ຈຳນວນບິນວັນນີ້</p>
+                <p class="stat-value text-blue-600">{{ daily_orders|default:0 }}</p>
+                <p class="text-sm text-gray-500" data-translate="orders">ລາຍການ</p>
+            </div>
+            <div class="text-blue-600">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="stat-title" data-translate="total_products">ສິນຄ້າທັງໝົດ</p>
+                <p class="stat-value text-purple-600">0</p>
+                <p class="text-sm text-gray-500" data-translate="items">ລາຍການ</p>
+            </div>
+            <div class="text-purple-600">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock -->
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="stat-title" data-translate="low_stock">ສິນຄ້າໃກ້ໝົດ</p>
+                <p class="stat-value text-red-600">0</p>
+                <p class="text-sm text-gray-500" data-translate="items">ລາຍການ</p>
+            </div>
+            <div class="text-red-600">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts and Recent Activities -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Sales Chart -->
+    <div class="lg:col-span-2 chart-container">
+        <h3 class="text-xl font-bold text-gray-900 mb-4" data-translate="sales_chart">ສະຖິຕິຍອດຂາຍ 7 ມື້ຍ້ອນຫຼັງ</h3>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="chart-container">
+        <h3 class="text-xl font-bold text-gray-900 mb-4" data-translate="recent_activities">ການເຄື່ອນໄຫວລ່າສຸດ</h3>
+        <div class="space-y-3">
+            {% for t in recent_transactions %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex-1">
+                    <p class="font-medium text-gray-900">{{ t.product.name }}</p>
+                    <p class="text-sm text-gray-500">{{ t.transaction_type }} | {{ t.created_at|date:"H:i" }}</p>
+                </div>
+                <span class="px-3 py-1 text-sm font-medium rounded-full {% if t.transaction_type == 'OUT' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                    {{ t.amount }}
+                </span>
+            </div>
+            {% empty %}
+            <div class="text-center text-gray-500 py-8" data-translate="no_data">
+                ຍັງບໍ່ມີຂໍ້ມູນ
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sales Chart
+    const ctx = document.getElementById('salesChart');
+    if (ctx) {
+        const labels = {{ dates|safe|default:"[]" }};
+        const data = {{ sales_data|safe|default:"[]" }};
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'ຍອດຂາຍ (ກີບ)',
+                    data: data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' ກີບ';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

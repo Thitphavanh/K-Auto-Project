@@ -1,0 +1,27 @@
+# Django Core
+Django==5.2.8
+Pillow==11.1.0
+
+# Database
+psycopg2-binary==2.9.10
+
+# Redis & Caching
+redis==5.2.1
+django-redis==5.4.0
+
+# Django Channels & WebSocket
+channels==4.2.0
+channels-redis==4.2.1
+daphne==4.1.2
+
+# ASGI Server
+uvicorn[standard]==0.34.0
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# Development Tools (optional)
+django-debug-toolbar==5.0.0
+
+# Admin Interface Enhancement
+django-jazzmin==3.0.1

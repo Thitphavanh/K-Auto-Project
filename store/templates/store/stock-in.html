@@ -1,0 +1,588 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ສິນຄ້າເຂົ້າ - K-Auto Parts{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Modern Stock-In Layout */
+    .stock-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    .stock-layout {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+        .stock-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Scanner Card - Left Side */
+    .stock-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 2px solid #e5e7eb;
+        position: sticky;
+        top: 20px;
+    }
+
+    .dark-mode .stock-card {
+        background: #1a1a1a;
+        box-shadow: 0 4px 12px rgba(255,255,255,0.08);
+        border-color: #333333;
+    }
+
+    .barcode-input {
+        font-size: 1.3rem;
+        padding: 15px;
+        text-align: center;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: white;
+        width: 100%;
+    }
+
+    .barcode-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        outline: none;
+    }
+
+    .dark-mode .barcode-input {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #fff;
+    }
+
+    .dark-mode .barcode-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Message Toast */
+    .toast-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        max-width: 400px;
+        padding: 16px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideInRight 0.3s ease;
+        display: none;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .toast-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .toast-error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    /* Stock Table - Right Side */
+    .stock-table-container {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 2px solid #e5e7eb;
+    }
+
+    .dark-mode .stock-table-container {
+        background: #1a1a1a;
+        border-color: #333333;
+    }
+
+    .stock-table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .dark-mode .stock-table-header {
+        border-bottom-color: #333333;
+    }
+
+    .table-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .dark-mode .table-title {
+        color: #f3f4f6;
+    }
+
+    .table-stats {
+        display: flex;
+        gap: 20px;
+        font-size: 0.9rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+    }
+
+    .dark-mode .stat-item {
+        background: #2a2a2a;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    /* Stock Items List */
+    .stock-items {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: calc(100vh - 280px);
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .stock-items::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .stock-items::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 3px;
+    }
+
+    .dark-mode .stock-items::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+
+    .stock-item {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 15px;
+        display: grid;
+        grid-template-columns: 60px 1fr auto;
+        gap: 15px;
+        align-items: center;
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.3s ease;
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .dark-mode .stock-item {
+        background: #2a2a2a;
+        border-color: #333333;
+    }
+
+    .stock-item.new-item {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .stock-item-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+    }
+
+    .dark-mode .stock-item-image {
+        border-color: #444;
+    }
+
+    .stock-item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stock-item-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1f2937;
+    }
+
+    .dark-mode .stock-item-name {
+        color: #f3f4f6;
+    }
+
+    .stock-item-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .stock-item-qty {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+    }
+
+    .qty-change {
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .qty-total {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #10b981;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+        50% {
+            opacity: 0.8;
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stock-container">
+    <!-- Toast Message -->
+    <div id="toast-message" class="toast-message"></div>
+
+    <!-- Audio for feedback -->
+    <audio id="sound-success" src="https://actions.google.com/sounds/v1/cartoon/clown_horn.ogg"></audio>
+    <audio id="sound-error" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+    <div class="stock-layout">
+        <!-- Left: Scanner Card -->
+        <div class="stock-card">
+            <form id="stock-in-form" method="POST" action="{% url 'api_stock_in' %}">
+                {% csrf_token %}
+                <!-- Header -->
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2" data-translate="stock_in_system">
+                        📦 ລະບົບສິນຄ້າເຂົ້າ
+                    </h1>
+                    <p class="text-gray-600 text-sm" data-translate="scan_to_receive">ສະແກນບາໂຄດເພື່ອຮັບສິນຄ້າເຂົ້າສາງ</p>
+                </div>
+
+                <!-- Barcode Input -->
+                <div class="mb-6">
+                    <label for="barcode-input" class="block text-sm font-medium text-gray-700 mb-2" data-translate="barcode_input">
+                        ຍິງບາໂຄດໃສ່ບ່ອນນີ້:
+                    </label>
+                    <input type="text" id="barcode-input" class="barcode-input" placeholder="ສະແກນເລີຍ..." autocomplete="off" data-translate="scan_placeholder">
+                </div>
+
+                <!-- Status Indicator -->
+                <div class="pt-6 border-t border-gray-200 text-center">
+                    <p class="text-sm text-gray-600">
+                        <span class="status-indicator"></span>
+                        <span data-translate="status_ready">ສະຖານະ: ພ້ອມສະແກນ...</span>
+                    </p>
+                    <div class="mt-3">
+                        <a href="{% url 'dashboard' %}" class="text-gray-900 hover:text-gray-600 text-sm font-medium" data-translate="back_to_dashboard">
+                            ← ກັບໄປໜ້າແດັສບອດ
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right: Stock Table -->
+        <div class="stock-table-container">
+            <div class="stock-table-header">
+                <h2 class="table-title" data-translate="stock_received_today">📋 ສິນຄ້າເຂົ້າວັນນີ້</h2>
+                <div class="table-stats">
+                    <div class="stat-item">
+                        <span class="stat-label" data-translate="total_items">ລາຍການ</span>
+                        <span class="stat-value" id="total-items">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" data-translate="total_qty">ຈຳນວນ</span>
+                        <span class="stat-value" id="total-qty">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stock-items" id="stock-items">
+                <!-- Empty State -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; color: #6b7280;" data-translate="no_stock_yet">
+                        ຍັງບໍ່ມີສິນຄ້າເຂົ້າ
+                    </div>
+                    <div style="font-size: 0.9rem; color: #9ca3af; margin-top: 8px;" data-translate="scan_to_start">
+                        ເລີ່ມສະແກນບາໂຄດເພື່ອຮັບສິນຄ້າເຂົ້າ
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- DOM Elements ---
+        const barcodeInput = document.getElementById('barcode-input');
+        const stockItemsContainer = document.getElementById('stock-items');
+        const emptyState = document.getElementById('empty-state');
+        const totalItemsEl = document.getElementById('total-items');
+        const totalQtyEl = document.getElementById('total-qty');
+        const toast = document.getElementById('toast-message');
+        const soundSuccess = document.getElementById('sound-success');
+        const soundError = document.getElementById('sound-error');
+        const statusIndicator = document.querySelector('.status-indicator');
+        const statusText = document.querySelector('[data-translate="status_ready"]');
+
+        // --- State ---
+        let totalItems = 0;
+        let totalQty = 0;
+        const addedProducts = new Set();
+
+        // --- CSRF Token for Fetch ---
+        function getCsrfToken() {
+            return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        }
+
+        // --- Utility Functions ---
+        function showToast(message, isSuccess = true) {
+            toast.textContent = message;
+            toast.className = `toast-message ${isSuccess ? 'toast-success' : 'toast-error'}`;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function playSound(isSuccess = true) {
+            if (isSuccess) {
+                soundSuccess.play();
+            } else {
+                soundError.play();
+            }
+        }
+
+        function updateStats() {
+            totalItems = addedProducts.size;
+            totalQty = Array.from(addedProducts).reduce((sum, id) => {
+                const item = document.getElementById(`product-${id}`);
+                const qtySpan = item.querySelector('.qty-total span');
+                return sum + parseInt(qtySpan.textContent, 10);
+            }, 0);
+
+            totalItemsEl.textContent = totalItems;
+            totalQtyEl.textContent = totalQty;
+        }
+
+        function addProductToList(product) {
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            // Check if product already in list
+            const existingItem = document.getElementById(`product-${product.id}`);
+            if (existingItem) {
+                // Update existing item
+                const qtyTotal = existingItem.querySelector('.qty-total span');
+                qtyTotal.textContent = product.new_quantity;
+                
+                // Highlight
+                existingItem.classList.add('new-item');
+                setTimeout(() => existingItem.classList.remove('new-item'), 500);
+                
+                updateStats();
+                return;
+            }
+
+            addedProducts.add(product.id);
+
+            const item = document.createElement('div');
+            item.className = 'stock-item new-item';
+            item.id = `product-${product.id}`;
+
+            const placeholderImage = "{% static 'images/default-product.png' %}";
+            const imageUrl = product.image ? product.image : placeholderImage;
+
+            item.innerHTML = `
+                <img src="${imageUrl}" alt="${product.name}" class="stock-item-image">
+                <div class="stock-item-info">
+                    <div class="stock-item-name">${product.name}</div>
+                    <div class="stock-item-meta">
+                        <span>${product.brand} / ${product.category}</span><br>
+                        <strong>Barcode:</strong> ${product.barcode}
+                    </div>
+                </div>
+                <div class="stock-item-qty">
+                    <div class="qty-change">+1</div>
+                    <div class="qty-total">Total: <span>${product.new_quantity}</span></div>
+                </div>
+            `;
+
+            stockItemsContainer.prepend(item);
+            setTimeout(() => item.classList.remove('new-item'), 500);
+            updateStats();
+        }
+
+        // --- WebSocket Connection ---
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/inventory/`;
+        let socket;
+
+        function connectWebSocket() {
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = function(e) {
+                console.log("WebSocket connection established");
+                statusIndicator.style.background = '#10b981'; // Green
+                statusText.textContent = 'ສະຖານະ: ເຊື່ອມຕໍ່ສຳເລັດ';
+            };
+
+            socket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                console.log("WebSocket message received:", data);
+                if (data.type === 'stock_added') {
+                    addProductToList(data.product);
+                }
+            };
+
+            socket.onclose = function(e) {
+                console.error('WebSocket connection closed unexpectedly. Trying to reconnect...');
+                statusIndicator.style.background = '#ef4444'; // Red
+                statusText.textContent = 'ສະຖານະ: ກຳລັງພະຍາຍາມເຊື່ອມຕໍ່...';
+                setTimeout(connectWebSocket, 3000); // Reconnect after 3 seconds
+            };
+
+            socket.onerror = function(err) {
+                console.error('WebSocket error:', err);
+                socket.close();
+            };
+        }
+
+        connectWebSocket(); // Initial connection
+
+        // --- Barcode Input Handler ---
+        barcodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const barcode = barcodeInput.value.trim();
+
+                if (!barcode) return;
+
+                fetch("{% url 'api_stock_in' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ barcode: barcode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // The websocket will handle adding the product to the list
+                        // addProductToList(data.product); 
+                        playSound(true);
+                        showToast(`✅ ເພີ່ມ ${data.product.name} ສຳເລັດ!`, true);
+                    } else {
+                        playSound(false);
+                        showToast(`❌ ຜິດພາດ: ${data.error}`, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    playSound(false);
+                    showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์', false);
+                });
+
+                barcodeInput.value = ''; // Clear input immediately
+            }
+        });
+
+        // --- Auto-focus on barcode input ---
+        barcodeInput.focus();
+        document.addEventListener('click', () => barcodeInput.focus());
+        barcodeInput.addEventListener('blur', () => {
+            setTimeout(() => barcodeInput.focus(), 10);
+        });
+    });
+</script>
+{% endblock %}
+

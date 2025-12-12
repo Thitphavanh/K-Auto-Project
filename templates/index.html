@@ -1,0 +1,568 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block title %}ໜ້າຫຼັກ - K-Auto{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 20px;
+        color: #000000;
+    }
+
+    .dark-mode .hero-title {
+        color: #ffffff;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: #6b7280;
+        margin-bottom: 40px;
+    }
+
+    .dark-mode .hero-subtitle {
+        color: #9ca3af;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid #e5e7eb;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        border-color: #000000;
+    }
+
+    .dark-mode .feature-card {
+        background: #1a1a1a;
+        box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+        border-color: #333333;
+    }
+
+    .dark-mode .feature-card:hover {
+        box-shadow: 0 4px 16px rgba(255,255,255,0.12);
+        border-color: #ffffff;
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #111827;
+    }
+
+    .dark-mode .feature-title {
+        color: #f9fafb;
+    }
+
+    .feature-description {
+        color: #6b7280;
+        line-height: 1.6;
+    }
+
+    .dark-mode .feature-description {
+        color: #9ca3af;
+    }
+
+    .cta-button {
+        display: inline-block;
+        padding: 15px 40px;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #ffffff;
+        background: #000000;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: 2px solid #000000;
+    }
+
+    .cta-button:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .dark-mode .cta-button {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .cta-button:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+
+    .cta-button-secondary {
+        background: #ffffff;
+        color: #000000;
+        border: 2px solid #000000;
+    }
+
+    .cta-button-secondary:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+
+    .dark-mode .cta-button-secondary {
+        background: #000000;
+        color: #ffffff;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .cta-button-secondary:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .stats-section {
+        background: #000000;
+        padding: 60px 0;
+        margin-top: 80px;
+    }
+
+    .dark-mode .stats-section {
+        background: #ffffff;
+    }
+
+    .stat-item {
+        text-align: center;
+        color: #ffffff;
+    }
+
+    .dark-mode .stat-item {
+        color: #000000;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        font-size: 1.125rem;
+        opacity: 0.8;
+    }
+
+    .divider {
+        width: 60px;
+        height: 4px;
+        background: #000000;
+        margin: 0 auto 40px;
+    }
+
+    .dark-mode .divider {
+        background: #ffffff;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        border-color: #000000;
+    }
+
+    .dark-mode .product-card {
+        background: #1a1a1a;
+        box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+        border-color: #333333;
+    }
+
+    .dark-mode .product-card:hover {
+        box-shadow: 0 4px 16px rgba(255,255,255,0.12);
+        border-color: #ffffff;
+    }
+
+    .product-image-wrapper {
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+        background: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dark-mode .product-image-wrapper {
+        background: #2a2a2a;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-no-image {
+        font-size: 4rem;
+        color: #d1d5db;
+    }
+
+    .product-content {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-category {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #f0f0f0;
+        color: #000000;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-bottom: 12px;
+        width: fit-content;
+    }
+
+    .dark-mode .product-category {
+        background: #2a2a2a;
+        color: #ffffff;
+    }
+
+    .product-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 10px;
+        min-height: 60px;
+    }
+
+    .dark-mode .product-name {
+        color: #f9fafb;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 15px;
+        margin-top: auto;
+    }
+
+    .dark-mode .product-price {
+        color: #ffffff;
+    }
+
+    .product-detail-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        background: #000000;
+        color: #ffffff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid #000000;
+    }
+
+    .product-detail-btn:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .dark-mode .product-detail-btn {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .dark-mode .product-detail-btn:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="hero-title" data-translate="welcome_title">
+            ຍິນດີຕ້ອນຮັບສູ່ K-Auto
+        </h1>
+        <p class="hero-subtitle" data-translate="welcome_subtitle">
+            ລະບົບຄຸ້ມຄອງອາໄຫຼ່ລົດທີ່ທັນສະໄໝ ແລະ ຫຼາກຫຼາຍຄຸນສົມບັດ
+        </p>
+        <div class="flex gap-4 justify-center flex-wrap">
+            <a href="{% url 'dashboard' %}" class="cta-button" data-translate="get_started">
+                ເລີ່ມຕົ້ນໃຊ້ງານ
+            </a>
+            <a href="{% url 'pos' %}" class="cta-button cta-button-secondary" data-translate="go_to_pos">
+                ໄປໜ້າຂາຍສິນຄ້າ
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Products Section -->
+{% if products %}
+<div class="container mx-auto px-4 py-16">
+    <h2 class="text-3xl font-bold text-center text-gray-900 mb-4" data-translate="products_title">
+        ສິນຄ້າຂອງເຮົາ
+    </h2>
+    <div class="divider"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {% for product in products %}
+        <div class="product-card" data-product-id="{{ product.id }}">
+            <div class="product-image-wrapper">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                    <div class="product-no-image">📦</div>
+                {% endif %}
+            </div>
+
+            <div class="product-content">
+                <div class="flex gap-2 flex-wrap">
+                    {% if product.category %}
+                        <span class="product-category">{{ product.category }}</span>
+                    {% endif %}
+                    {% if product.brand %}
+                        <span class="product-category">{{ product.brand.name }}</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="product-name">{{ product.name }}</h3>
+
+                <div class="product-price">{{ product.sell_price|floatformat:0 }} <span data-translate="currency">ກີບ</span></div>
+
+                <div class="product-stock text-sm mt-2">
+                    ສະຕັອກ: <span class="product-quantity">{{ product.quantity }}</span> ຊິ້ນ
+                </div>
+
+                <a href="{% url 'product-detail' product.slug %}" class="product-detail-btn mt-4" data-translate="view_details">
+                    ເບິ່ງລາຍລະອຽດ
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Section -->
+<div class="container mx-auto px-4 py-16">
+    <h2 class="text-3xl font-bold text-center text-gray-900 mb-4" data-translate="features_title">
+        ຄຸນສົມບັດຫຼັກ
+    </h2>
+    <div class="divider"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Feature 1: POS -->
+        <div class="feature-card">
+            <div class="feature-icon">🛒</div>
+            <h3 class="feature-title" data-translate="feature_pos_title">ລະບົບຂາຍສິນຄ້າ</h3>
+            <p class="feature-description" data-translate="feature_pos_desc">
+                ລະບົບ POS ທີ່ໃຊ້ງານງ່າຍ ສະແກນບາໂຄດໄດ້ທັນທີ ປະຢັດເວລາ
+            </p>
+            <a href="{% url 'pos' %}" class="text-gray-900 hover:text-gray-600 mt-4 inline-block font-medium" data-translate="learn_more">
+                ເບິ່ງເພີ່ມເຕີມ →
+            </a>
+        </div>
+
+        <!-- Feature 2: Stock Management -->
+        <div class="feature-card">
+            <div class="feature-icon">📦</div>
+            <h3 class="feature-title" data-translate="feature_stock_title">ຄຸ້ມຄອງສິນຄ້າ</h3>
+            <p class="feature-description" data-translate="feature_stock_desc">
+                ຈັດການສິນຄ້າເຂົ້າ-ອອກ ຕິດຕາມສະຕ໋ອກແບບສົດໆ
+            </p>
+            <a href="{% url 'stock-in' %}" class="text-gray-900 hover:text-gray-600 mt-4 inline-block font-medium" data-translate="learn_more">
+                ເບິ່ງເພີ່ມເຕີມ →
+            </a>
+        </div>
+
+        <!-- Feature 3: Dashboard -->
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title" data-translate="feature_dashboard_title">Dashboard ສະຫຼຸບຂໍ້ມູນ</h3>
+            <p class="feature-description" data-translate="feature_dashboard_desc">
+                ເບິ່ງສະຖິຕິ ແລະ ກຣາຟຂໍ້ມູນແບບ Real-time
+            </p>
+            <a href="{% url 'dashboard' %}" class="text-gray-900 hover:text-gray-600 mt-4 inline-block font-medium" data-translate="learn_more">
+                ເບິ່ງເພີ່ມເຕີມ →
+            </a>
+        </div>
+
+        <!-- Feature 4: Multi-Language -->
+        <div class="feature-card">
+            <div class="feature-icon">🌍</div>
+            <h3 class="feature-title" data-translate="feature_lang_title">ຫຼາຍພາສາ</h3>
+            <p class="feature-description" data-translate="feature_lang_desc">
+                ຮອງຮັບພາສາລາວ, ໄທ, ແລະ ອັງກິດ ປ່ຽນໄດ້ທັນທີ
+            </p>
+            <span class="text-gray-900 mt-4 inline-block font-medium">🇱🇦 🇹🇭 🇺🇸</span>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="stat-item">
+                <div class="stat-number" data-translate="stat_products">{{ products|length }}+</div>
+                <div class="stat-label" data-translate="stat_products_label">ສິນຄ້າທັງໝົດ</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-translate="stat_sales">0+</div>
+                <div class="stat-label" data-translate="stat_sales_label">ການຂາຍວັນນີ້</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-translate="stat_users">100%</div>
+                <div class="stat-label" data-translate="stat_users_label">ຄວາມພໍໃຈ</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="container mx-auto px-4 py-16 text-center">
+    <h2 class="text-3xl font-bold text-gray-900 mb-4" data-translate="cta_title">
+        ພ້ອມທີ່ຈະເລີ່ມຕົ້ນບໍ?
+    </h2>
+    <div class="divider"></div>
+    <p class="text-gray-600 mb-8 text-lg" data-translate="cta_subtitle">
+        ເລີ່ມຕົ້ນຄຸ້ມຄອງອາໄຫຼ່ລົດຂອງທ່ານດ້ວຍລະບົບທີ່ທັນສະໄໝ
+    </p>
+    <a href="{% url 'dashboard' %}" class="cta-button" data-translate="start_now">
+        ເລີ່ມຕົ້ນດຽວນີ້
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add translations for Home page
+    if (window.translations) {
+        window.translations.lo = {
+            ...window.translations.lo,
+            welcome_title: 'ຍິນດີຕ້ອນຮັບສູ່ K-Auto',
+            welcome_subtitle: 'ລະບົບຄຸ້ມຄອງອາໄຫຼ່ລົດທີ່ທັນສະໄໝ ແລະ ຫຼາກຫຼາຍຄຸນສົມບັດ',
+            get_started: 'ເລີ່ມຕົ້ນໃຊ້ງານ',
+            go_to_pos: 'ໄປໜ້າຂາຍສິນຄ້າ',
+            features_title: 'ຄຸນສົມບັດຫຼັກ',
+            feature_pos_title: 'ລະບົບຂາຍສິນຄ້າ',
+            feature_pos_desc: 'ລະບົບ POS ທີ່ໃຊ້ງານງ່າຍ ສະແກນບາໂຄດໄດ້ທັນທີ ປະຢັດເວລາ',
+            feature_stock_title: 'ຄຸ້ມຄອງສິນຄ້າ',
+            feature_stock_desc: 'ຈັດການສິນຄ້າເຂົ້າ-ອອກ ຕິດຕາມສະຕ໋ອກແບບສົດໆ',
+            feature_dashboard_title: 'Dashboard ສະຫຼຸບຂໍ້ມູນ',
+            feature_dashboard_desc: 'ເບິ່ງສະຖິຕິ ແລະ ກຣາຟຂໍ້ມູນແບບ Real-time',
+            feature_lang_title: 'ຫຼາຍພາສາ',
+            feature_lang_desc: 'ຮອງຮັບພາສາລາວ, ໄທ, ແລະ ອັງກິດ ປ່ຽນໄດ້ທັນທີ',
+            learn_more: 'ເບິ່ງເພີ່ມເຕີມ →',
+            products_title: 'ສິນຄ້າຂອງເຮົາ',
+            view_details: 'ເບິ່ງລາຍລະອຽດ',
+            currency: 'ກີບ',
+            stat_products_label: 'ສິນຄ້າທັງໝົດ',
+            stat_sales: '0+',
+            stat_sales_label: 'ການຂາຍວັນນີ້',
+            stat_users: '100%',
+            stat_users_label: 'ຄວາມພໍໃຈ',
+            cta_title: 'ພ້ອມທີ່ຈະເລີ່ມຕົ້ນບໍ?',
+            cta_subtitle: 'ເລີ່ມຕົ້ນຄຸ້ມຄອງອາໄຫຼ່ລົດຂອງທ່ານດ້ວຍລະບົບທີ່ທັນສະໄໝ',
+            start_now: 'ເລີ່ມຕົ້ນດຽວນີ້'
+        };
+
+        window.translations.th = {
+            ...window.translations.th,
+            welcome_title: 'ยินดีต้อนรับสู่ K-Auto',
+            welcome_subtitle: 'ระบบจัดการอะไหล่รถยนต์ที่ทันสมัยและครบครัน',
+            get_started: 'เริ่มใช้งาน',
+            go_to_pos: 'ไปหน้าขายสินค้า',
+            features_title: 'คุณสมบัติหลัก',
+            feature_pos_title: 'ระบบขายสินค้า',
+            feature_pos_desc: 'ระบบ POS ใช้งานง่าย สแกนบาร์โค้ดได้ทันที ประหยัดเวลา',
+            feature_stock_title: 'จัดการสินค้า',
+            feature_stock_desc: 'จัดการสินค้าเข้า-ออก ติดตามสต็อกแบบเรียลไทม์',
+            feature_dashboard_title: 'Dashboard สรุปข้อมูล',
+            feature_dashboard_desc: 'ดูสถิติและกราฟข้อมูลแบบ Real-time',
+            feature_lang_title: 'หลายภาษา',
+            feature_lang_desc: 'รองรับภาษาลาว, ไทย และอังกฤษ เปลี่ยนได้ทันที',
+            learn_more: 'ดูเพิ่มเติม →',
+            products_title: 'สินค้าของเรา',
+            view_details: 'ดูรายละเอียด',
+            currency: 'บาท',
+            stat_products_label: 'สินค้าทั้งหมด',
+            stat_sales: '0+',
+            stat_sales_label: 'การขายวันนี้',
+            stat_users: '100%',
+            stat_users_label: 'ความพึงพอใจ',
+            cta_title: 'พร้อมเริ่มต้นแล้วหรือยัง?',
+            cta_subtitle: 'เริ่มจัดการอะไหล่รถของคุณด้วยระบบที่ทันสมัย',
+            start_now: 'เริ่มใช้งานเลย'
+        };
+
+        window.translations.en = {
+            ...window.translations.en,
+            welcome_title: 'Welcome to K-Auto',
+            welcome_subtitle: 'Modern and Feature-Rich Auto Parts Management System',
+            get_started: 'Get Started',
+            go_to_pos: 'Go to POS',
+            features_title: 'Key Features',
+            feature_pos_title: 'Point of Sale System',
+            feature_pos_desc: 'Easy-to-use POS system with instant barcode scanning',
+            feature_stock_title: 'Inventory Management',
+            feature_stock_desc: 'Manage stock in/out with real-time tracking',
+            feature_dashboard_title: 'Analytics Dashboard',
+            feature_dashboard_desc: 'View statistics and charts in real-time',
+            feature_lang_title: 'Multi-Language',
+            feature_lang_desc: 'Supports Lao, Thai, and English with instant switching',
+            learn_more: 'Learn More →',
+            products_title: 'Our Products',
+            view_details: 'View Details',
+            currency: 'LAK',
+            stat_products_label: 'Total Products',
+            stat_sales: '0+',
+            stat_sales_label: 'Sales Today',
+            stat_users: '100%',
+            stat_users_label: 'Satisfaction',
+            cta_title: 'Ready to Get Started?',
+            cta_subtitle: 'Start managing your auto parts with a modern system',
+            start_now: 'Start Now'
+        };
+    }
+</script>
+{% endblock %}

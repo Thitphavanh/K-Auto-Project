@@ -1,0 +1,1163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ຂາຍສິນຄ້າ (POS Pro) - K-Auto Parts{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Modern Retail POS Style - Like 7-Eleven, Big C, Lotus */
+    .pos-container { max-width: 1400px; margin: 20px auto; padding: 0 15px; }
+    .pos-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+
+    @media (max-width: 1024px) {
+        .pos-layout { grid-template-columns: 1fr; }
+    }
+
+    .pos-card {
+        background: white; border-radius: 16px; padding: 25px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    .dark-mode .pos-card { background: #1a1a1a; box-shadow: 0 6px 20px rgba(255,255,255,0.08); }
+
+    /* Header Section */
+    .pos-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .pos-header h1 { margin: 0; font-size: 1.8rem; }
+    .pos-header .store-name { font-size: 0.9rem; opacity: 0.9; }
+
+    /* Total Display - Like Retail Cash Register */
+    .total-section {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .total-label { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; }
+    .total-display {
+        background: #000;
+        color: #0f0;
+        font-family: 'Courier New', monospace;
+        font-size: 2.5rem;
+        text-align: right;
+        padding: 15px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        border: 3px solid #0f0;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    /* Barcode Scanner Input */
+    .scanner-section {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    .dark-mode .scanner-section { background: #2d2d2d; }
+
+    .barcode-input {
+        font-size: 1.3rem;
+        padding: 15px 20px;
+        width: 100%;
+        border: 3px solid #3b82f6;
+        border-radius: 10px;
+        outline: none;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .barcode-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Cart Items - Modern Card Style */
+    .cart-items {
+        max-height: calc(100vh - 500px);
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .cart-item {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: grid;
+        grid-template-columns: 80px 1fr auto;
+        gap: 15px;
+        align-items: center;
+        transition: all 0.3s;
+    }
+    .cart-item:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    .dark-mode .cart-item {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .cart-item-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        background: #f9fafb;
+    }
+    .dark-mode .cart-item-image { background: #1a1a1a; border-color: #444; }
+
+    .cart-item-info {
+        flex: 1;
+    }
+    .cart-item-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        color: #1f2937;
+    }
+    .dark-mode .cart-item-name { color: #f3f4f6; }
+
+    .cart-item-price {
+        color: #3b82f6;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .cart-item-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .qty-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f3f4f6;
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+    .dark-mode .qty-controls { background: #374151; }
+
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        background: #3b82f6;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .qty-btn:hover { background: #2563eb; transform: scale(1.05); }
+    .qty-btn:active { transform: scale(0.95); }
+
+    .qty-display {
+        min-width: 35px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .item-total {
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: #059669;
+    }
+
+    .btn-remove {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .btn-remove:hover { background: #dc2626; transform: scale(1.05); }
+
+    /* Empty Cart Message */
+    .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+    .empty-cart-icon { font-size: 4rem; margin-bottom: 15px; }
+
+    /* Command Buttons - Retail Style */
+    .command-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-cmd {
+        padding: 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.3rem;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-cmd:active { transform: scale(0.97); }
+    .btn-cmd span { font-size: 2rem; }
+
+    .btn-pay {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+    }
+    .btn-pay:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-clear {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+    }
+    .btn-clear:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Status Message */
+    #status-msg {
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        margin-top: 10px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Summary Panel */
+    .summary-panel {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 20px;
+    }
+    .dark-mode .summary-panel { background: #1a1a1a; }
+
+    .summary-items {
+        border-top: 2px dashed #e5e7eb;
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }
+    .summary-row.total {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e40af;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #e5e7eb;
+    }
+
+    /* Product Preview Toast */
+    .product-preview {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: none;
+        z-index: 1000;
+        max-width: 350px;
+        animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .dark-mode .product-preview { background: #2d2d2d; }
+
+    .preview-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .preview-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .preview-price {
+        font-size: 1.5rem;
+        color: #10b981;
+        font-weight: 700;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active { display: flex; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 0;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+    .dark-mode .modal-content { background: #1a1a1a; }
+
+    .modal-header {
+        padding: 25px;
+        border-radius: 20px 20px 0 0;
+        text-align: center;
+        position: relative;
+    }
+    .modal-header.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .modal-header.warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    .modal-header.danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .modal-icon {
+        font-size: 4rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .modal-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .modal-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .modal-receipt {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .dark-mode .modal-receipt { background: #2d2d2d; }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px dashed #e5e7eb;
+    }
+    .dark-mode .receipt-row { border-color: #444; }
+
+    .receipt-row:last-child { border-bottom: none; }
+
+    .receipt-label {
+        font-weight: 600;
+        color: #6b7280;
+    }
+    .dark-mode .receipt-label { color: #9ca3af; }
+
+    .receipt-value {
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .dark-mode .receipt-value { color: #f3f4f6; }
+
+    .receipt-total {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dark-mode .receipt-total { border-color: #444; }
+
+    .receipt-total .label {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e40af;
+    }
+    .dark-mode .receipt-total .label { color: #60a5fa; }
+
+    .receipt-total .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    .receipt-items {
+        margin-top: 20px;
+    }
+
+    .receipt-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .dark-mode .receipt-item { border-color: #444; }
+
+    .receipt-item-name {
+        flex: 1;
+        font-weight: 600;
+    }
+
+    .receipt-item-qty {
+        margin: 0 15px;
+        color: #6b7280;
+    }
+
+    .receipt-item-price {
+        font-weight: 700;
+        color: #059669;
+        min-width: 100px;
+        text-align: right;
+    }
+
+    .modal-message {
+        text-align: center;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #4b5563;
+        margin-bottom: 20px;
+    }
+    .dark-mode .modal-message { color: #d1d5db; }
+
+    .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .modal-btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .modal-btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .modal-btn-primary:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .modal-btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .modal-btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    }
+
+    .modal-btn-secondary {
+        background: #e5e7eb;
+        color: #374151;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .modal-btn-secondary:hover {
+        background: #d1d5db;
+        transform: translateY(-2px);
+    }
+    .dark-mode .modal-btn-secondary {
+        background: #374151;
+        color: #f3f4f6;
+    }
+
+    .modal-btn-full {
+        grid-column: 1 / -1;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-container">
+    <div class="pos-layout">
+        <!-- Left Panel: Cart Items -->
+        <div class="pos-card">
+            <!-- Header -->
+            <div class="pos-header">
+                <div>
+                    <h1>🛒 ຂາຍສິນຄ້າ (POS)</h1>
+                    <div class="store-name">K-Auto Parts Store</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.9rem;">ຜູ້ຂາຍ:</div>
+                    <div style="font-weight: 700;">{{ request.user.username }}</div>
+                </div>
+            </div>
+
+            <!-- Scanner Section -->
+            <div class="scanner-section">
+                <input type="text" id="barcode" class="barcode-input"
+                       placeholder="🔍 ຍິງບາໂຄດສິນຄ້າ ຫຼື ພິມຄຳສັ່ງ (CMD-PAY, CMD-CLEAR)..."
+                       autofocus autocomplete="off">
+                <div id="status-msg"></div>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="cart-items" id="cart-items">
+                <div class="empty-cart">
+                    <div class="empty-cart-icon">🛒</div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">ກະຕ່າສິນຄ້າວ່າງເປົ່າ</div>
+                    <div style="margin-top: 8px;">ຍິງບາໂຄດສິນຄ້າເພື່ອເລີ່ມຂາຍ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Summary & Actions -->
+        <div class="summary-panel">
+            <div class="total-section">
+                <div class="total-label">💰 ຍອດລວມທັງໝົດ</div>
+                <div class="total-display" id="grand-total">0.00</div>
+                <div style="text-align: center; margin-top: 10px; font-size: 0.9rem;">ກີບ LAK</div>
+            </div>
+
+            <div class="summary-items">
+                <div class="summary-row">
+                    <span>📦 ຈຳນວນລາຍການ:</span>
+                    <span id="item-count">0</span>
+                </div>
+                <div class="summary-row">
+                    <span>🔢 ຈຳນວນຊິ້ນ:</span>
+                    <span id="total-qty">0</span>
+                </div>
+                <div class="summary-row total">
+                    <span>ລວມທັງໝົດ:</span>
+                    <span id="grand-total-summary">0.00 ກີບ</span>
+                </div>
+            </div>
+
+            <!-- Command Buttons -->
+            <div class="command-section">
+                <button onclick="handleCommand('CMD-PAY')" class="btn-cmd btn-pay">
+                    <span>💰</span>
+                    <div>ຄິດເງິນ</div>
+                </button>
+
+                <button onclick="handleCommand('CMD-CLEAR')" class="btn-cmd btn-clear">
+                    <span>🗑️</span>
+                    <div>ລ້າງບິນ</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Preview Toast (shows when scanning) -->
+<div class="product-preview" id="product-preview">
+    <img id="preview-img" class="preview-image" src="" alt="">
+    <div class="preview-name" id="preview-name"></div>
+    <div class="preview-price" id="preview-price"></div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkout-modal">
+    <div class="modal-content">
+        <div class="modal-header success">
+            <span class="modal-icon">💰</span>
+            <h2 class="modal-title">ຢືນຢັນການຂາຍ</h2>
+            <div class="modal-subtitle">ກະລຸນາກວດສອບລາຍການກ່ອນບັນທຶກ</div>
+        </div>
+        <div class="modal-body">
+            <!-- Receipt Summary -->
+            <div class="modal-receipt">
+                <div class="receipt-row">
+                    <span class="receipt-label">📦 ຈຳນວນລາຍການ:</span>
+                    <span class="receipt-value" id="modal-item-count">0</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">🔢 ຈຳນວນຊິ້ນ:</span>
+                    <span class="receipt-value" id="modal-total-qty">0</span>
+                </div>
+                <div class="receipt-total">
+                    <span class="label">💵 ຍອດລວມທັງໝົດ:</span>
+                    <span class="value" id="modal-grand-total">0</span>
+                </div>
+            </div>
+
+            <!-- Items List -->
+            <div class="receipt-items" id="modal-items-list"></div>
+
+            <!-- Actions -->
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="closeCheckoutModal()">
+                    ຍົກເລີກ
+                </button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmCheckout()">
+                    ບັນທຶກການຂາຍ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="success-modal">
+    <div class="modal-content">
+        <div class="modal-header success">
+            <span class="modal-icon">✅</span>
+            <h2 class="modal-title">ບັນທຶກສຳເລັດ!</h2>
+            <div class="modal-subtitle">ການຂາຍຖືກບັນທຶກແລ້ວ</div>
+        </div>
+        <div class="modal-body">
+            <div class="modal-receipt">
+                <div class="receipt-total">
+                    <span class="label">💰 ຍອດລວມ:</span>
+                    <span class="value" id="success-total">0</span>
+                </div>
+            </div>
+            <div class="modal-message">
+                <p>🎉 ຂອບໃຈທີ່ໃຊ້ບໍລິການ!</p>
+                <p style="font-size: 1rem; margin-top: 10px;">ພ້ອມຮັບລູກຄ້າຄົນຕໍ່ໄປແລ້ວ</p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-primary modal-btn-full" onclick="closeSuccessModal()">
+                    ເລີ່ມຂາຍຕໍ່
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Cart Modal -->
+<div class="modal-overlay" id="clear-modal">
+    <div class="modal-content">
+        <div class="modal-header warning">
+            <span class="modal-icon">⚠️</span>
+            <h2 class="modal-title">ລ້າງລາຍການ?</h2>
+            <div class="modal-subtitle">ການກະທຳນີ້ບໍ່ສາມາດຍົກເລີກໄດ້</div>
+        </div>
+        <div class="modal-body">
+            <div class="modal-message">
+                <p><strong>ຕ້ອງການລ້າງລາຍການທັງໝົດແທ້ບໍ່?</strong></p>
+                <p style="font-size: 1rem; margin-top: 10px; color: #dc2626;">
+                    ລາຍການທັງໝົດ <span id="clear-item-count" style="font-weight: 700;">0</span> ລາຍການຈະຖືກລຶບ
+                </p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="closeClearModal()">
+                    ຍົກເລີກ
+                </button>
+                <button class="modal-btn modal-btn-danger" onclick="confirmClear()">
+                    🗑️ ລ້າງລາຍການ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Item Modal -->
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal-content">
+        <div class="modal-header danger">
+            <span class="modal-icon">🗑️</span>
+            <h2 class="modal-title">ລຶບລາຍການ?</h2>
+            <div class="modal-subtitle">ຕ້ອງການລຶບສິນຄ້ານີ້ອອກຈາກບິນບໍ່?</div>
+        </div>
+        <div class="modal-body">
+            <div class="modal-message">
+                <p id="delete-item-name" style="font-weight: 700; color: #1f2937;"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="closeDeleteModal()">
+                    ຍົກເລີກ
+                </button>
+                <button class="modal-btn modal-btn-danger" onclick="confirmDelete()">
+                    ລຶບລາຍການ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<audio id="sound-beep" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+<audio id="sound-error" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="sound-cash" src="https://actions.google.com/sounds/v1/cartoon/clown_horn.ogg"></audio>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const CART_STORAGE_KEY = 'k_auto_pos_cart'; // localStorage key
+    let cart = []; // ກະຕ່າສິນຄ້າໃນໜ່ວຍຄວາມຈຳ
+
+    const input = document.getElementById('barcode');
+    const cartItems = document.getElementById('cart-items');
+    const totalDisplay = document.getElementById('grand-total');
+    const totalSummary = document.getElementById('grand-total-summary');
+    const itemCount = document.getElementById('item-count');
+    const totalQty = document.getElementById('total-qty');
+    const msgDisplay = document.getElementById('status-msg');
+    const productPreview = document.getElementById('product-preview');
+
+    // ສຽງ
+    const beep = document.getElementById('sound-beep');
+    const errorSound = document.getElementById('sound-error');
+    const cashSound = document.getElementById('sound-cash');
+
+    // === localStorage Functions ===
+    function saveCart() {
+        try {
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+            console.log('💾 Cart saved to localStorage');
+        } catch (error) {
+            console.error('Error saving cart:', error);
+        }
+    }
+
+    function loadCart() {
+        try {
+            const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                console.log('✅ Cart loaded from localStorage:', cart.length, 'items');
+                if (cart.length > 0) {
+                    showMsg(`🔄 ກູ້ຄືນລາຍການ ${cart.length} ລາຍການ`, false);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            cart = [];
+        }
+    }
+
+    function clearCartStorage() {
+        try {
+            localStorage.removeItem(CART_STORAGE_KEY);
+            console.log('🗑️ Cart storage cleared');
+        } catch (error) {
+            console.error('Error clearing cart storage:', error);
+        }
+    }
+
+    // Load cart on page load
+    loadCart();
+
+    // Focus ຊ່ອງຍິງຕະຫຼອດເວລາ
+    input.focus();
+    document.addEventListener('click', () => input.focus());
+
+    // ດັກຈັບການຍິງບາໂຄດ
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            let code = input.value.trim();
+
+            if(code) {
+                if (code.toUpperCase().startsWith('CMD-')) {
+                    handleCommand(code); // ຖ້າເປັນຄຳສັ່ງ
+                } else {
+                    addToCart(code); // ຖ້າເປັນສິນຄ້າ
+                }
+            }
+            input.value = '';
+        }
+    });
+
+    // Modal Elements
+    const checkoutModal = document.getElementById('checkout-modal');
+    const successModal = document.getElementById('success-modal');
+    const clearModal = document.getElementById('clear-modal');
+    const deleteModal = document.getElementById('delete-modal');
+    let itemToDelete = null;
+
+    // === Logic ຈັດການຄຳສັ່ງ (Magic Sheet & Buttons) ===
+    window.handleCommand = function(cmd) {
+        cmd = cmd.toUpperCase();
+        if (cmd === 'CMD-PAY') {
+            if (cart.length > 0) {
+                processCheckout();
+            } else {
+                showMsg('❌ ບໍ່ມີລາຍການສິນຄ້າ', true);
+                input.focus();
+            }
+        } else if (cmd === 'CMD-CLEAR') {
+            openClearModal();
+        } else {
+            showMsg('❌ ບໍ່ຮູ້ຈັກຄຳສັ່ງ: ' + cmd, true);
+            input.focus();
+        }
+    }
+
+    // === Logic ດຶງຂໍ້ມູນສິນຄ້າ ===
+    function addToCart(barcode) {
+        let existingItem = cart.find(item => item.barcode === barcode);
+
+        if (existingItem) {
+            existingItem.qty += 1;
+            renderCart();
+            beep.play();
+            showMsg(`✅ ເພີ່ມຈຳນວນ: ${existingItem.name}`, false);
+        } else {
+            fetch(`/api/get-product/?barcode=${barcode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.found) {
+                        if (data.stock > 0) {
+                            // Show product preview
+                            showProductPreview(data);
+
+                            cart.push({
+                                id: data.id,
+                                barcode: barcode,
+                                name: data.name,
+                                price: data.price,
+                                qty: 1,
+                                image: data.image
+                            });
+                            renderCart();
+                            beep.play();
+                            showMsg(`📦 ເພີ່ມ: ${data.name}`, false);
+                        } else {
+                            showMsg(`❌ ສິນຄ້າໝົດ! (${data.name})`, true);
+                        }
+                    } else {
+                        showMsg('❌ ບໍ່ພົບສິນຄ້າ!', true);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showMsg('❌ ເກີດຂໍ້ຜິດພາດໃນການດຶງຂໍ້ມູນ', true);
+                });
+        }
+    }
+
+    // === Show Product Preview Toast ===
+    function showProductPreview(product) {
+        const defaultImg = 'https://via.placeholder.com/300x200?text=No+Image';
+        document.getElementById('preview-img').src = product.image || defaultImg;
+        document.getElementById('preview-name').innerText = product.name;
+        document.getElementById('preview-price').innerText = product.price.toLocaleString() + ' ກີບ';
+
+        productPreview.style.display = 'block';
+        setTimeout(() => {
+            productPreview.style.display = 'none';
+        }, 3000);
+    }
+
+    // === ສະແດງຜົນກະຕ່າສິນຄ້າ (Modern Card Style) ===
+    function renderCart() {
+        if (cart.length === 0) {
+            cartItems.innerHTML = `
+                <div class="empty-cart">
+                    <div class="empty-cart-icon">🛒</div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">ກະຕ່າສິນຄ້າວ່າງເປົ່າ</div>
+                    <div style="margin-top: 8px;">ຍິງບາໂຄດສິນຄ້າເພື່ອເລີ່ມຂາຍ</div>
+                </div>
+            `;
+            updateSummary(0, 0, 0);
+            saveCart(); // Save to localStorage
+            return;
+        }
+
+        let html = '';
+        let grandTotal = 0;
+        let totalItems = cart.length;
+        let totalQuantity = 0;
+        const defaultImg = 'https://via.placeholder.com/80?text=No+Image';
+
+        cart.forEach((item, index) => {
+            let itemTotal = item.price * item.qty;
+            grandTotal += itemTotal;
+            totalQuantity += item.qty;
+
+            html += `
+                <div class="cart-item">
+                    <img src="${item.image || defaultImg}"
+                         alt="${item.name}"
+                         class="cart-item-image"
+                         onerror="this.src='${defaultImg}'">
+
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">${item.price.toLocaleString()} ກີບ</div>
+                    </div>
+
+                    <div class="cart-item-controls">
+                        <div class="qty-controls">
+                            <button onclick="updateQty(${index}, -1)" class="qty-btn">-</button>
+                            <span class="qty-display">${item.qty}</span>
+                            <button onclick="updateQty(${index}, 1)" class="qty-btn">+</button>
+                        </div>
+                        <div class="item-total">${itemTotal.toLocaleString()} ກີບ</div>
+                        <button onclick="removeItem(${index})" class="btn-remove">ລຶບ</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        cartItems.innerHTML = html;
+        updateSummary(grandTotal, totalItems, totalQuantity);
+        saveCart(); // Save to localStorage after rendering
+    }
+
+    // === Update Summary Panel ===
+    function updateSummary(total, items, qty) {
+        totalDisplay.innerText = total.toLocaleString();
+        totalSummary.innerText = total.toLocaleString() + ' ກີບ';
+        itemCount.innerText = items;
+        totalQty.innerText = qty;
+    }
+
+    // === ຟັງຊັນຊ່ວຍເຫຼືອ ===
+    window.updateQty = function(index, change) {
+        if (cart[index].qty + change > 0) {
+            cart[index].qty += change;
+            renderCart();
+            beep.play();
+        } else if (cart[index].qty + change === 0) {
+            openDeleteModal(index);
+        }
+        input.focus();
+    }
+
+    window.removeItem = function(index) {
+        openDeleteModal(index);
+        input.focus();
+    }
+
+    function showMsg(text, isError = false) {
+        msgDisplay.innerText = text;
+        msgDisplay.style.background = isError ? '#fee2e2' : '#dbeafe';
+        msgDisplay.style.color = isError ? '#dc2626' : '#1e40af';
+        if(isError) errorSound.play();
+
+        // Auto clear message after 5 seconds
+        setTimeout(() => {
+            msgDisplay.innerText = '';
+            msgDisplay.style.background = 'transparent';
+        }, 5000);
+    }
+
+    // === ບັນທຶກການຂາຍ (Checkout) ===
+    function processCheckout() {
+        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const totalQtyValue = cart.reduce((sum, item) => sum + item.qty, 0);
+
+        // Populate checkout modal
+        document.getElementById('modal-item-count').innerText = cart.length;
+        document.getElementById('modal-total-qty').innerText = totalQtyValue;
+        document.getElementById('modal-grand-total').innerText = total.toLocaleString() + ' ກີບ';
+
+        // Populate items list
+        let itemsHTML = '';
+        cart.forEach(item => {
+            itemsHTML += `
+                <div class="receipt-item">
+                    <span class="receipt-item-name">${item.name}</span>
+                    <span class="receipt-item-qty">x${item.qty}</span>
+                    <span class="receipt-item-price">${(item.price * item.qty).toLocaleString()} ກີບ</span>
+                </div>
+            `;
+        });
+        document.getElementById('modal-items-list').innerHTML = itemsHTML;
+
+        // Open modal
+        checkoutModal.classList.add('active');
+    }
+
+    window.closeCheckoutModal = function() {
+        checkoutModal.classList.remove('active');
+        input.focus();
+    }
+
+    window.confirmCheckout = function() {
+        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+        checkoutModal.classList.remove('active');
+        showMsg('⏳ ກຳລັງບັນທຶກ...', false);
+
+        fetch('/api/checkout/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ items: cart })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                cashSound.play();
+
+                // Show success modal
+                document.getElementById('success-total').innerText = total.toLocaleString() + ' ກີບ';
+                successModal.classList.add('active');
+
+                // Clear cart and localStorage
+                cart = [];
+                clearCartStorage();
+                renderCart();
+            } else {
+                showMsg('❌ ເກີດຂໍ້ຜິດພາດ: ' + data.error, true);
+                input.focus();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showMsg('❌ ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່', true);
+            input.focus();
+        });
+    }
+
+    window.closeSuccessModal = function() {
+        successModal.classList.remove('active');
+        showMsg('✅ ພ້ອມຂາຍຕໍ່ໄປ...', false);
+        input.focus();
+    }
+
+    // === Clear Cart Modal ===
+    function openClearModal() {
+        document.getElementById('clear-item-count').innerText = cart.length;
+        clearModal.classList.add('active');
+    }
+
+    window.closeClearModal = function() {
+        clearModal.classList.remove('active');
+        input.focus();
+    }
+
+    window.confirmClear = function() {
+        cart = [];
+        clearCartStorage();
+        renderCart();
+        clearModal.classList.remove('active');
+        showMsg('🗑️ ລ້າງບິນຮຽບຮ້ອຍ');
+        input.focus();
+    }
+
+    // === Delete Item Modal ===
+    function openDeleteModal(index) {
+        itemToDelete = index;
+        document.getElementById('delete-item-name').innerText = cart[index].name;
+        deleteModal.classList.add('active');
+    }
+
+    window.closeDeleteModal = function() {
+        deleteModal.classList.remove('active');
+        itemToDelete = null;
+        input.focus();
+    }
+
+    window.confirmDelete = function() {
+        if (itemToDelete !== null) {
+            cart.splice(itemToDelete, 1);
+            renderCart();
+            deleteModal.classList.remove('active');
+            itemToDelete = null;
+        }
+        input.focus();
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+                input.focus();
+            }
+        });
+    });
+
+    // Close modals on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            input.focus();
+        }
+    });
+
+    // Initial render
+    renderCart();
+</script>
+{% endblock %}
