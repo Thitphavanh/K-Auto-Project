@@ -677,6 +677,18 @@
                         <div id="customer-autocomplete" class="customer-autocomplete"></div>
                     </div>
 
+                    <!-- Service Info Inputs -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #6b7280; display: block; margin-bottom: 2px;">ຊ່າງສ້ອມ / Mechanic</label>
+                            <input type="text" id="mech-name" placeholder="ຊື່ຊ່າງ..." class="barcode-input" style="font-size: 0.9rem; padding: 6px; border-width: 2px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #6b7280; display: block; margin-bottom: 2px;">ພະນັກງານຂາຍ / Sales Rep</label>
+                            <input type="text" id="sale-rep" value="{{ request.user.username }}" placeholder="ຊື່..." class="barcode-input" style="font-size: 0.9rem; padding: 6px; border-width: 2px;">
+                        </div>
+                    </div>
+
                     <!-- Selected Customer Display -->
                     <div id="selected-customer-display" style="display: none; background: #fff; padding: 12px; border-radius: 12px; border: 2px solid #fee2e2; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.05);">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
@@ -705,8 +717,8 @@
                     <input type="hidden" id="car-model">
                     <input type="hidden" id="car-frame">
                     <input type="hidden" id="car-color">
-                    <input type="hidden" id="mech-name">
-                    <input type="hidden" id="sale-rep" value="{{ request.user.username }}">
+
+                    <!-- Hidden Inputs for Checkout Logic -->
                 </div>
             </div>
 
@@ -1008,6 +1020,8 @@
         document.getElementById('car-model').value = customer.car_model || '';
         document.getElementById('car-frame').value = customer.car_frame_no || '';
         document.getElementById('car-color').value = customer.car_color || '';
+        document.getElementById('mech-name').value = customer.mechanic_name || '';
+        document.getElementById('sale-rep').value = customer.sale_representative || '{{ request.user.username }}';
 
         // Update Display UI
         document.getElementById('display-name').innerText = customer.name || 'Unknown';
@@ -1036,6 +1050,8 @@
         document.getElementById('car-frame').value = '';
         document.getElementById('car-color').value = '';
         document.getElementById('car-mileage').value = '';
+        document.getElementById('mech-name').value = '';
+        document.getElementById('sale-rep').value = '{{ request.user.username }}';
         
         document.getElementById('selected-customer-display').style.display = 'none';
         selectedCustomer = null;

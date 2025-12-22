@@ -45,6 +45,7 @@ services:
     environment:
       - DJANGO_ENV=dev
       - DEBUG=True
+      - RUNNING_IN_DOCKER=true
       - SECRET_KEY=django-insecure-l@45e9ftfsoabujib25dbrzb5&7z)e(_9u0ekknw6z831^n#eu
       - ALLOWED_HOSTS=localhost,127.0.0.1,web
       - DB_NAME=kauto_db

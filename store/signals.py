@@ -23,7 +23,7 @@ def send_inventory_update(action, product):
         'quantity': product.quantity,
         'sell_price': str(product.sell_price),
         'cost_price': str(product.cost_price),
-        'category': product.category,
+        'category': product.category.name if product.category else None,
         'brand': product.brand.name if product.brand else None,
         'slug': product.slug,
         'image_url': product.image.url if product.image else None,

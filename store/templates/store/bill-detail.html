@@ -415,15 +415,9 @@
                 <tr>
                     <td colspan="2" rowspan="2" style="text-align: left; font-weight: bold;">ຕົວອັກສອນ</td>
                     <td colspan="3" style="text-align: right; font-weight: bold;">ລວມສຸດທິ/Net Amount:</td>
-                    <td style="font-weight: bold;">₭</td>
-                    <td style="text-align: right;">{{ order.net_amount_lak|floatformat:0|intcomma }}</td>
-                    <td style="font-weight: bold;">฿</td>
-                </tr>
-                <tr>
-                    <td style="text-align: right;">{{ order.net_amount_thb|floatformat:2|intcomma }}</td>
-                    <td style="font-weight: bold;">$</td>
-                    <td colspan="2" style="text-align: left;">{{ order.net_amount_usd|floatformat:2|intcomma }}</td>
-                    <td style="text-align: right;">-</td>
+                    <td style="text-align: right;">₭{{ order.net_amount_lak|floatformat:0|intcomma }}</td>
+                    <td style="font-weight: bold;">฿{{ order.net_amount_thb|floatformat:2|intcomma }}</td>
+                    <td style="font-weight: bold;">${{ order.net_amount_usd|floatformat:2|intcomma }}</td>
                 </tr>
             </tbody>
         </table>

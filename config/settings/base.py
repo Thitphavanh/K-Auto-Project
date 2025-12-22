@@ -81,8 +81,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 # Django Channels Configuration
+# Detect if running inside Docker
+IS_DOCKER = os.path.exists('/.dockerenv') or os.environ.get("RUNNING_IN_DOCKER") == "true"
+
 # Default host varies based on whether we are in Docker or on the host
-DEFAULT_REDIS_HOST = "redis" if os.path.exists('/.dockerenv') else "127.0.0.1"
+DEFAULT_REDIS_HOST = "redis" if IS_DOCKER else "127.0.0.1"
 
 CHANNEL_LAYERS = {
     "default": {
@@ -108,10 +111,11 @@ if USE_SQLITE:
     }
 else:
     # Detect if running inside Docker
-    IS_DOCKER = os.path.exists('/.dockerenv')
+    # We check for the file AND an explicit environment variable we'll set in the Dockerfile
+    IS_DOCKER = os.path.exists('/.dockerenv') or os.environ.get("RUNNING_IN_DOCKER") == "true"
     
     # Default host/port varies based on whether we are in Docker or on the host
-    # Host needs 54320 (mapped port), Docker needs 'db' and 5432 (internal service)
+    # Host needs 127.0.0.1:54320 (mapped port), Docker needs 'db' and 5432 (internal service)
     DEFAULT_DB_HOST = "db" if IS_DOCKER else "127.0.0.1"
     DEFAULT_DB_PORT = "5432" if IS_DOCKER else "54320"
 
@@ -138,9 +142,9 @@ CACHES = {
     }
 }
 
-# Session Configuration (use Redis)
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+# Session Configuration (use Database instead of Redis to avoid serialization issues)
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+# SESSION_CACHE_ALIAS = "default"  # Not needed for DB sessions
 
 
 # Password validation

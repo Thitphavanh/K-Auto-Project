@@ -1,4 +1,4 @@
-from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer
+from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer, Category
 from django.db import transaction as db_transaction
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
@@ -60,11 +60,7 @@ def product_list_view(request):
         products = products.order_by(sort_by)
 
     # ດຶງລາຍການໝວດໝູ່ທັງໝົດ (ສຳລັບ dropdown filter)
-    categories = (
-        Product.objects.values_list("category", flat=True)
-        .distinct()
-        .order_by("category")
-    )
+    categories = Category.objects.all().order_by("name")
 
     # ດຶງລາຍການຍີ່ຫໍ້ທັງໝົດ (ສຳລັບ dropdown filter)
     brands = Brand.objects.all().order_by("name")
@@ -350,6 +346,8 @@ def api_checkout(request):
                         "car_model": car_info.get('model'),
                         "car_frame_no": car_info.get('frame_no'),
                         "car_color": car_info.get('color'),
+                        "mechanic_name": mechanic_info.get('mechanic'),
+                        "sale_representative": mechanic_info.get('sale_rep'),
                     }
                     
                     if cust_code:
@@ -384,8 +382,8 @@ def api_checkout(request):
                     car_frame_no=car_info.get('frame_no'),
                     car_mileage=car_info.get('mileage'),
                     car_color=car_info.get('color'),
-                    mechanic_name=mechanic_info.get('mechanic'),
-                    sale_representative=mechanic_info.get('sale_rep'),
+                    mechanic_name=mechanic_info.get('mechanic') or (customer.mechanic_name if customer else None),
+                    sale_representative=mechanic_info.get('sale_rep') or (customer.sale_representative if customer else None),
                     rate_lak=rate_lak,
                     rate_usd=rate_usd,
                     payment_cash=True, # POS default to cash for now
@@ -496,7 +494,7 @@ def api_stock_in(request):
                     "barcode": product.barcode,
                     "name": product.name,
                     "brand": product.brand.name if product.brand else "-",
-                    "category": product.category or "-",
+                    "category": product.category.name if product.category else "-",
                     "image": product.image.url if product.image else None,
                     "old_quantity": old_quantity,
                     "new_quantity": product.quantity,
@@ -695,6 +693,10 @@ def api_save_customer(request):
         customer.car_color = data.get("car_color")
         customer.car_mileage = data.get("car_mileage") or 0
         
+        # New Fields
+        customer.mechanic_name = data.get("mechanic_name")
+        customer.sale_representative = data.get("sale_representative")
+        
         customer.save()
         
         return JsonResponse({
@@ -707,7 +709,9 @@ def api_save_customer(request):
                 "car_register_no": customer.car_register_no,
                 "car_brand": customer.car_brand,
                 "car_model": customer.car_model,
-                "car_mileage": customer.car_mileage
+                "car_mileage": customer.car_mileage,
+                "mechanic_name": customer.mechanic_name,
+                "sale_representative": customer.sale_representative
             }
         })
     except Exception as e:

@@ -93,6 +93,18 @@
                 </div>
             </div>
 
+            <!-- New Fields: Service Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ຊ່າງສ້ອມ / Mechanic</label>
+                    <input type="text" id="mechanic_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ຊື່ຊ່າງສ້ອມ">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ພະນັກງານຂາຍ / Sales Rep.</label>
+                    <input type="text" id="sale_representative" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ຊື່ພະນັກງານຂາຍ">
+                </div>
+            </div>
+
         </div>
 
         <!-- Submit Button -->
@@ -162,6 +174,8 @@
         document.getElementById('car_frame_no').value = c.car_frame_no || '';
         document.getElementById('car_color').value = c.car_color || '';
         document.getElementById('car_mileage').value = c.car_mileage || 0;
+        document.getElementById('mechanic_name').value = c.mechanic_name || '';
+        document.getElementById('sale_representative').value = c.sale_representative || '';
         
         resultDiv.classList.add('hidden');
         searchInput.value = ''; // Clear search
@@ -179,7 +193,9 @@
             car_model: document.getElementById('car_model').value,
             car_frame_no: document.getElementById('car_frame_no').value,
             car_color: document.getElementById('car_color').value,
-            car_mileage: document.getElementById('car_mileage').value
+            car_mileage: document.getElementById('car_mileage').value,
+            mechanic_name: document.getElementById('mechanic_name').value,
+            sale_representative: document.getElementById('sale_representative').value
         };
 
         if (!data.name) {

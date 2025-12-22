@@ -507,8 +507,8 @@
                     <select name="category" class="filter-select">
                         <option value="" data-translate="all_categories">ທັງໝົດ</option>
                         {% for category in categories %}
-                            <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>
-                                {{ category }}
+                            <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                                {{ category.name }}
                             </option>
                         {% endfor %}
                     </select>
@@ -582,7 +582,7 @@
 
                 <h3 class="product-name">{{ product.name }}</h3>
 
-                <div class="product-price">{{ product.sell_price|floatformat:0 }} <span data-translate="currency">ບາດ</span></div>
+                <!-- <div class="product-price">{{ product.sell_price|floatformat:0 }} <span data-translate="currency">ບາດ</span></div> -->
 
                 <div class="product-stock">
                     <span data-translate="stock">ສະຕັອກ:</span>

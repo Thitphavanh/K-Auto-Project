@@ -1,10 +1,16 @@
 from django.contrib import admin
-from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer
+from .models import Product, Transaction, Brand, Category, Order, OrderItem, CurrencyRate, Customer
 
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
     list_display = ("name",)
+    search_fields = ("name",)
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "description")
     search_fields = ("name",)
 
 
@@ -14,16 +20,19 @@ class BrandAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     # ສະແດງຄໍລຳຫຍັງແດ່ໃນຕາຕະລາງ
-    list_display = ("barcode", "name", "quantity", "cost_price", "sell_price")
+    list_display = ("barcode", "name", "category", "brand", "quantity", "cost_price", "sell_price")
 
     # ເພີ່ມຊ່ອງຄົ້ນຫາ (ສາມາດເອົາເືຄື່ອງຍິງບາໂຄດ ຍິງໃສ່ຊ່ອງ Search ໄດ້ເລີຍ)
     search_fields = ("barcode", "name")
 
     # ຕົວ​ກອງ​ຂໍ້​ມູນ
-    list_filter = ("quantity",)
+    list_filter = ("category", "brand", "quantity")
 
     # ຈັດລຽງຕາມຈຳນວນນ້ອຍໄປຫາຫຼາຍ (ເພື່ອເບິ່ງຂອງໃກ້ໝົດ)
     ordering = ("quantity",)
+
+    # Auto-generate slug from name in Admin
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(Transaction)

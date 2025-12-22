@@ -20,6 +20,22 @@ class Brand(models.Model):
         verbose_name_plural = "ຂໍ້ມູນຍີ່ຫໍ້ທັງໝົດ"
 
 
+# 2. ສ້າງ Model ສຳລັບ Category (ໝວດໝູ່)
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="ຊື່ໝວດໝູ່")
+    description = models.TextField(blank=True, null=True, verbose_name="ລາຍລະອຽດ")
+    image = models.ImageField(
+        upload_to="categories/", blank=True, null=True, verbose_name="ຮູບພາບ"
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "ໝວດໝູ່"
+        verbose_name_plural = "ຂໍ້ມູນໝວດໝູ່ທັງໝົດ"
+
+
 class Customer(models.Model):
     # Customer Code (Unique ID for reference)
     code = models.CharField(max_length=20, unique=True, verbose_name="ລະຫັດລູກຄ້າ")
@@ -35,6 +51,10 @@ class Customer(models.Model):
     car_frame_no = models.CharField(max_length=100, blank=True, null=True, verbose_name="ເລກຖັງ")
     car_color = models.CharField(max_length=50, blank=True, null=True, verbose_name="ສີ")
     car_mileage = models.IntegerField(default=0, verbose_name="ເລກກິໂລ (km)")
+    
+    # Preferred/Default Service Info
+    mechanic_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="ຊ່າງສ້ອມ")
+    sale_representative = models.CharField(max_length=100, blank=True, null=True, verbose_name="ພະນັກງານຂາຍ")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,12 +96,12 @@ class Product(models.Model):
         upload_to="products/", blank=True, null=True, verbose_name="ຮູບພາບ"
     )
 
-    # ໝວດໝູ່ສິນຄ້າ
-    category = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="ໝວດໝູ່"
+    # ໝວດໝູ່ສິນຄ້າ (ForeignKey)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ໝວດໝູ່"
     )
 
-    # 2. ແກ້ໄຂບ່ອນນີ້: ປ່ຽນຈາກ CharField ເປັນ ForeignKey
+    # ຍີ່ຫໍ້ສິນຄ້າ (ForeignKey)
     brand = models.ForeignKey(
         Brand, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ຍີ່ຫໍ້"
     )
@@ -96,13 +116,17 @@ class Product(models.Model):
     quantity = models.IntegerField(default=0, verbose_name="ຈຳນວນຄົງເຫຼືອ")
 
     def save(self, *args, **kwargs):
-        # ສ້າງ slug ອັດຕະໂນມັດຖ້າຍັງບໍ່ມີ
-        if not self.slug:
-            # ໃຊ້ barcode ເປັນ base ສຳລັບ slug ເພາະມັນ unique
-            base_slug = slugify(self.barcode)
+        # 1. Automate Name from Barcode if empty
+        if not self.name and self.barcode:
+            self.name = self.barcode
+
+        # 2. Automate Slug from Name if empty
+        if not self.slug and self.name:
+            # Generate base slug from name
+            base_slug = slugify(self.name)
             self.slug = base_slug
 
-            # ກວດສອບວ່າ slug ນີ້ມີຢູ່ແລ້ວບໍ່, ຖ້າມີກໍເພີ່ມເລກທ້າຍ
+            # Ensure uniqueness
             counter = 1
             while Product.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{base_slug}-{counter}"
