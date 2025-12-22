@@ -10,9 +10,6 @@
 
             <!-- Navigation Menu -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="{% url 'home' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="home">
-                    ໜ້າຫຼັກ
-                </a>
                 <a href="{% url 'product-list' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="products">
                     ສິນຄ້າ
                 </a>
@@ -24,6 +21,12 @@
                 </a>
                 <a href="{% url 'stock-in' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="stock">
                     ສິນຄ້າເຂົ້າ
+                </a>
+                <a href="{% url 'input-bill' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="input-bill">
+                    ອອກບິນໃຫ້ລູກຄ້າ
+                </a>
+                <a href="{% url 'order_list' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="order-list">
+                    ລາຍການບິນທັງໝົດ
                 </a>
             </div>
 
@@ -74,9 +77,6 @@
 
         <!-- Mobile Menu -->
         <div id="mobileMenu" class="hidden md:hidden pb-4">
-            <a href="{% url 'home' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="home">
-                ໜ້າຫຼັກ
-            </a>
             <a href="{% url 'product-list' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="products">
                 ສິນຄ້າ
             </a>
@@ -88,6 +88,12 @@
             </a>
             <a href="{% url 'stock-in' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="stock">
                 ສິນຄ້າເຂົ້າ
+            </a>
+            <a href="{% url 'input-bill' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="input-bill">
+                ອອກບິນໃຫ້ລູກຄ້າ
+            </a>
+            <a href="{% url 'order_list' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="order-list">
+                ລາຍການບິນທັງໝົດ
             </a>
         </div>
     </div>

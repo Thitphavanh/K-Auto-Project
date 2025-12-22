@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}ລາຍການບິນທັງໝົດ - K-Auto{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1800px] mx-auto bg-white p-4 md:p-8 rounded-xl shadow-sm border border-gray-100">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b-2 border-red-600 gap-4">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'home' %}" class="text-red-600 hover:text-red-800 transition-colors">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-file-invoice-dollar text-red-600"></i> ລາຍການບິນທັງໝົດ
+            </h1>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'input-bill' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all shadow-sm">
+                <i class="fas fa-plus"></i> ສ້າງບິນ (Manual)
+            </a>
+            <a href="{% url 'pos' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all shadow-sm">
+                <i class="fas fa-cash-register"></i> ໜ້າ POS
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-gray-50 p-6 rounded-xl mb-8 border border-gray-100">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+            <div class="space-y-2 lg:col-span-1">
+                <label class="block text-sm font-bold text-gray-700">ຄົ້ນຫາ</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="search" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ search_query }}" placeholder="ເລກບິນ, ລູກຄ້າ, ທະບຽນ...">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">ເລີ່ມວັນທີ</label>
+                <input type="date" name="date_from" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ date_from }}">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">ຫາວັນທີ</label>
+                <input type="date" name="date_to" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ date_to }}">
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-all shadow-sm">
+                    ກັ່ນຕອງ
+                </button>
+                <a href="{% url 'order_list' %}" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-all">
+                    ຣີເຊັດ
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Section -->
+    <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <table class="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider">ວັນທີ</th>
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider">ເລກທີບິນ</th>
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider">ຊື່ລູກຄ້າ</th>
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider">ທະບຽນລົດ</th>
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider text-right">ຍອດລວມ (฿)</th>
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider text-right">ຍອດລວມ (₭)</th>
+                    <th class="px-6 py-4 font-bold text-gray-700 uppercase text-xs tracking-wider text-center">ເຄື່ອງມື</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+                {% for order in orders %}
+                <tr class="hover:bg-gray-50 transition-colors group">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ order.date | date:"d/m/Y" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap"><span class="font-bold text-gray-900">{{ order.invoice_no }}</span></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ order.customer_name|default:"-" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ order.car_register_no|default:"-" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right font-bold text-red-600">{{ order.net_amount_thb|floatformat:2|intcomma }} ฿</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-600 font-medium">{{ order.net_amount_lak|floatformat:0|intcomma }} ₭</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex justify-center gap-3 text-sm">
+                            <a href="{% url 'order_detail' order.invoice_no %}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="ເບິ່ງລາຍລະອຽດ">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'order_update' order.invoice_no %}" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all" title="ແກ້ໄຂ">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'order_print' order.invoice_no %}" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all" title="ພິມ">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <a href="{% url 'order_delete' order.invoice_no %}" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all" title="ລຶບ">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-400">
+                            <i class="fas fa-folder-open text-6xl mb-4 opacity-20"></i>
+                            <p class="text-lg font-medium">ບໍ່ພົບລາຍການບິນ</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

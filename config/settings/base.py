@@ -5,9 +5,13 @@ This file contains settings that are common to all environments
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Load .env file
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -297,6 +301,8 @@ JAZZMIN_SETTINGS = {
         "store.Product",
         "store.Category",
         "store.Brand",
+        "store.Order",
+        "store.CurrencyRate",
     ],
     # Custom links to append to app groups, keyed on app name
     "custom_links": {
@@ -319,6 +325,8 @@ JAZZMIN_SETTINGS = {
         "store.Product": "fas fa-box",
         "store.Category": "fas fa-tags",
         "store.Brand": "fas fa-copyright",
+        "store.Order": "fas fa-file-invoice-dollar",
+        "store.CurrencyRate": "fas fa-money-bill-wave",
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",

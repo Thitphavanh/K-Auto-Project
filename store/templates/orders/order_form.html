@@ -1,0 +1,531 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}{% if is_update %}ແກ້ໄຂບິນ{% else %}ສ້າງບິນໃໝ່{% endif %} - K-Auto{% endblock %}
+
+{% block extra_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1800px] mx-auto bg-white p-4 md:p-8 rounded-xl shadow-sm border border-gray-100">
+    <form method="POST">
+        {% csrf_token %}
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b-2 border-red-600 gap-4">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'order_list' %}" class="text-red-600 hover:text-red-800 transition-colors">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-{% if is_update %}edit{% else %}plus-circle{% endif %} text-red-600"></i>
+                    {% if is_update %}ແກ້ໄຂບິນ {{ order.invoice_no }}{% else %}ສ້າງບິນໃໝ່{% endif %}
+                </h1>
+            </div>
+            <div class="actions">
+                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all shadow-md active:transform active:scale-95">
+                    <i class="fas fa-save"></i> ບັນທຶກບິນ
+                </button>
+            </div>
+        </div>
+
+        <!-- Customer Info Section -->
+        <div class="mb-10">
+            <div class="bg-gray-100 px-4 py-2 font-bold text-gray-800 border-l-4 border-red-600 mb-6 flex items-center gap-2">
+                <i class="fas fa-user-tag text-red-600"></i> ຂໍ້ມູນລູກຄ້າ & ລົດ
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ວັນທີ</label>
+                    <input type="date" name="date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.date|date:'Y-m-d'|default:today|date:'Y-m-d' }}" required>
+                </div>
+                <div class="space-y-1.5 relative">
+                    <label class="block text-sm font-bold text-gray-700">ຊື່ລູກຄ້າ</label>
+                    <div class="relative">
+                        <input type="text" name="customer_name" id="custName" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.customer_name|default:'' }}" required autocomplete="off" placeholder="🔍 ຄົ້ນຫາຊື່ ຫຼື ເບີໂທ...">
+                        <div id="custAutocomplete" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-[1000] max-h-60 overflow-y-auto"></div>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ເບີໂທ</label>
+                    <input type="text" name="customer_phone" id="custPhone" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.customer_phone|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ລະຫັດລູກຄ້າ</label>
+                    <input type="text" name="customer_code" id="custCode" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.customer_code|default:'' }}">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ທະບຽນລົດ</label>
+                    <input type="text" name="car_register_no" id="carReg" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_register_no|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ແຂວງ</label>
+                    <input type="text" name="car_province" id="carProv" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_province|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ຍີ່ຫໍ້</label>
+                    <input type="text" name="car_brand" id="carBrand" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_brand|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ລຸ້ນ</label>
+                    <input type="text" name="car_model" id="carModel" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_model|default:'' }}">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ເລກຖັງ (Frame No)</label>
+                    <input type="text" name="car_frame_no" id="carFrame" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_frame_no|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ສີລົດ</label>
+                    <input type="text" name="car_color" id="carColor" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_color|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ກິໂລແມັດ (Mileage)</label>
+                    <input type="text" name="car_mileage" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.car_mileage|default:'' }}">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ຊ່າງສ້ອມແປງ</label>
+                    <input type="text" name="mechanic_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.mechanic_name|default:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="mb-10">
+            <div class="bg-gray-100 px-4 py-2 font-bold text-gray-800 border-l-4 border-red-600 mb-6 flex justify-between items-center">
+                <span class="flex items-center gap-2"><i class="fas fa-boxes text-red-600"></i> ລາຍການສິນຄ້າ/ບໍລິການ</span>
+                <button type="button" class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-600 text-white text-sm font-bold rounded hover:bg-green-700 transition-all shadow-sm" id="addRow">
+                    <i class="fas fa-plus"></i> ເພີ່ມລາຍການ
+                </button>
+            </div>
+            
+            <input type="hidden" name="item_count" id="itemCount" value="{{ items|length|default:1 }}">
+            
+            <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mb-6">
+                <table class="w-full text-left border-collapse min-w-[1000px]" id="itemsTable">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-center w-12">#</th>
+                            <th class="px-4 py-3 w-40">Ref. Code</th>
+                            <th class="px-4 py-3">Description</th>
+                            <th class="px-4 py-3 w-28 text-center">Quantity</th>
+                            <th class="px-4 py-3 w-28 text-center">Unit</th>
+                            <th class="px-4 py-3 w-40 text-right">Price</th>
+                            <th class="px-4 py-3 w-40 text-right">Total</th>
+                            <th class="px-4 py-3 w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        {% if items %}
+                            {% for item in items %}
+                            <tr class="hover:bg-gray-50 transition-colors group">
+                                <td class="px-4 py-3 text-center text-sm text-gray-500">{{ forloop.counter }}</td>
+                                <td class="px-2 py-2">
+                                    <input type="text" name="ref_code_{{ forloop.counter }}" class="w-full bg-transparent px-2 py-1 focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm" value="{{ item.ref_code|default:'' }}">
+                                </td>
+                                <td class="px-2 py-2 relative">
+                                    <div class="relative">
+                                        <input type="text" name="description_{{ forloop.counter }}" value="{{ item.description }}" class="w-full bg-transparent px-2 py-1 focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm desc-input" required autocomplete="off">
+                                        <div class="hidden absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-[900] max-h-48 overflow-y-auto prod-autocomplete"></div>
+                                    </div>
+                                </td>
+                                <td class="px-2 py-2">
+                                    <input type="number" step="any" name="quantity_{{ forloop.counter }}" value="{{ item.quantity|floatformat:0 }}" class="w-full bg-transparent px-2 py-1 text-center focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm qty-input">
+                                </td>
+                                <td class="px-2 py-2">
+                                    <input type="text" name="unit_{{ forloop.counter }}" class="w-full bg-transparent px-2 py-1 text-center focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm" value="{{ item.unit|default:'ອັນ' }}">
+                                </td>
+                                <td class="px-2 py-2">
+                                    <input type="number" step="any" name="unit_price_{{ forloop.counter }}" value="{{ item.unit_price|floatformat:0 }}" class="w-full bg-transparent px-2 py-1 text-right focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm font-medium price-input">
+                                </td>
+                                <td class="px-4 py-3 text-right text-sm font-bold text-red-600">
+                                    <span class="row-total">{{ item.amount|floatformat:0 }}</span>
+                                </td>
+                                <td class="px-2 py-2 text-center">
+                                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors remove-row-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="hover:bg-gray-50 transition-colors group">
+                                <td class="px-4 py-3 text-center text-sm text-gray-500">1</td>
+                                <td class="px-2 py-2">
+                                    <input type="text" name="ref_code_1" class="w-full bg-transparent px-2 py-1 focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm" value="">
+                                </td>
+                                <td class="px-2 py-2 relative">
+                                    <div class="relative">
+                                        <input type="text" name="description_1" value="" class="w-full bg-transparent px-2 py-1 focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm desc-input" required autocomplete="off">
+                                        <div class="hidden absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-[900] max-h-48 overflow-y-auto prod-autocomplete"></div>
+                                    </div>
+                                </td>
+                                <td class="px-2 py-2">
+                                    <input type="number" step="any" name="quantity_1" value="1" class="w-full bg-transparent px-2 py-1 text-center focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm qty-input">
+                                </td>
+                                <td class="px-2 py-2">
+                                    <input type="text" name="unit_1" class="w-full bg-transparent px-2 py-1 text-center focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm" value="ອັນ">
+                                </td>
+                                <td class="px-2 py-2">
+                                    <input type="number" step="any" name="unit_price_1" value="0" class="w-full bg-transparent px-2 py-1 text-right focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm font-medium price-input">
+                                </td>
+                                <td class="px-4 py-3 text-right text-sm font-bold text-red-600">
+                                    <span class="row-total">0</span>
+                                </td>
+                                <td class="px-2 py-2 text-center">
+                                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors remove-row-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment Info Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div>
+                <div class="bg-gray-100 px-4 py-2 font-bold text-gray-800 border-l-4 border-red-600 mb-6 flex items-center gap-2">
+                    <i class="fas fa-money-bill-wave text-red-600"></i> ການຈ່າຍເງິນ & ອາກອນ
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ອາກອນ (%)</label>
+                        <input type="number" step="any" name="tax_percent" id="taxPercent" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.tax_percent|default:0 }}">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ຈ່າຍສົດ (Cash Amount)</label>
+                        <input type="number" step="any" name="payment_amount_cash" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.payment_amount_cash|default:0 }}">
+                        <label class="inline-flex items-center gap-2 text-xs text-gray-600 mt-1 cursor-pointer">
+                            <input type="checkbox" name="payment_cash" id="chkCash" class="rounded text-red-600 focus:ring-red-500" {% if order.payment_cash %}checked{% endif %}> ຈ່າຍສົດ
+                        </label>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ຈ່າຍແຊັກ (Check Amount)</label>
+                        <input type="number" step="any" name="payment_amount_check" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.payment_amount_check|default:0 }}">
+                        <label class="inline-flex items-center gap-2 text-xs text-gray-600 mt-1 cursor-pointer">
+                            <input type="checkbox" name="payment_check" id="chkCheck" class="rounded text-red-600 focus:ring-red-500" {% if order.payment_check %}checked{% endif %}> ຈ່າຍແຊັກ
+                        </label>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ຕິດໜີ້ (Credit Amount)</label>
+                        <input type="number" step="any" name="payment_amount_credit" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.payment_amount_credit|default:0 }}">
+                        <label class="inline-flex items-center gap-2 text-xs text-gray-600 mt-1 cursor-pointer">
+                            <input type="checkbox" name="payment_credit" id="chkCredit" class="rounded text-red-600 focus:ring-red-500" {% if order.payment_credit %}checked{% endif %}> ຕິດໜີ້
+                        </label>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ຜູ້ຮັບເງິນ</label>
+                        <input type="text" name="received_by" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.received_by|default:'' }}">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ເລກທີແຊັກ</label>
+                        <input type="text" name="check_no" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.check_no|default:'' }}">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ລົງວັນທີແຊັກ</label>
+                        <input type="date" name="check_date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.check_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ທະນາຄານ</label>
+                        <input type="text" name="bank_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" value="{{ order.bank_name|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col justify-end">
+                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 font-medium">ຍອດລວມ (Subtotal)</span>
+                            <span class="text-xl font-bold text-gray-900" id="displaySubtotal">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 font-medium">ອາກອນ (Tax)</span>
+                            <span class="text-xl font-bold text-gray-900" id="displayTax">0</span>
+                        </div>
+                        <div class="pt-4 border-t border-gray-200 flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-900">ລວມທັງໝົດ (Total THB)</span>
+                            <span class="text-4xl font-black text-red-600" id="displayTotal">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-4 mt-10">
+                    <a href="{% url 'order_list' %}" class="px-8 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-all">ຍົກເລີກ</a>
+                    <button type="submit" class="px-8 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all shadow-md active:transform active:scale-95">
+                        <i class="fas fa-save mr-2"></i> ບັນທຶກບິນ
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <input type="hidden" name="sale_representative" value="{{ order.sale_representative|default:'' }}">
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        const tableBody = document.querySelector('#itemsTable tbody');
+        const addRowBtn = document.querySelector('#addRow');
+        const itemCountInput = document.querySelector('#itemCount');
+        const taxPercentInput = document.querySelector('#taxPercent');
+
+        function updateItemCount() {
+            const rows = tableBody.querySelectorAll('tr');
+            itemCountInput.value = rows.length;
+            rows.forEach((row, index) => {
+                const num = index + 1;
+                row.cells[0].textContent = num;
+                // Update input names for dynamic handling
+                row.querySelectorAll('input').forEach(input => {
+                    if (input.name) {
+                        const baseName = input.name.split('_');
+                        if (baseName.length > 1 && !isNaN(baseName[baseName.length-1])) {
+                           baseName.pop();
+                           input.name = baseName.join('_') + '_' + num;
+                        } else if (baseName.length === 1 || isNaN(baseName[baseName.length-1])) {
+                           input.name = input.name.replace(/_\d+$/, '') + '_' + num;
+                        }
+                    }
+                });
+            });
+        }
+
+        function calculateTotals() {
+            let subtotal = 0;
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                const total = qty * price;
+                row.querySelector('.row-total').textContent = total.toLocaleString();
+                subtotal += total;
+            });
+
+            const taxPercent = parseFloat(taxPercentInput.value) || 0;
+            const taxAmount = (subtotal * taxPercent) / 100;
+            const finalTotal = subtotal + taxAmount;
+
+            document.getElementById('displaySubtotal').textContent = subtotal.toLocaleString();
+            document.getElementById('displayTax').textContent = taxAmount.toLocaleString();
+            document.getElementById('displayTotal').textContent = finalTotal.toLocaleString();
+        }
+
+        addRowBtn.addEventListener('click', () => {
+            const rowCount = tableBody.querySelectorAll('tr').length + 1;
+            const newRow = document.createElement('tr');
+            newRow.className = 'hover:bg-gray-50 transition-colors group';
+            newRow.innerHTML = `
+                <td class="px-4 py-3 text-center text-sm text-gray-500">${rowCount}</td>
+                <td class="px-2 py-2">
+                    <input type="text" name="ref_code_${rowCount}" class="w-full bg-transparent px-2 py-1 focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm" value="">
+                </td>
+                <td class="px-2 py-2 relative">
+                    <div class="relative">
+                        <input type="text" name="description_${rowCount}" value="" class="w-full bg-transparent px-2 py-1 focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm desc-input" required autocomplete="off">
+                        <div class="hidden absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-[900] max-h-48 overflow-y-auto prod-autocomplete"></div>
+                    </div>
+                </td>
+                <td class="px-2 py-2">
+                    <input type="number" step="any" name="quantity_${rowCount}" value="1" class="w-full bg-transparent px-2 py-1 text-center focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm qty-input">
+                </td>
+                <td class="px-2 py-2">
+                    <input type="text" name="unit_${rowCount}" class="w-full bg-transparent px-2 py-1 text-center focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm" value="ອັນ">
+                </td>
+                <td class="px-2 py-2">
+                    <input type="number" step="any" name="unit_price_${rowCount}" value="0" class="w-full bg-transparent px-2 py-1 text-right focus:bg-white focus:ring-1 focus:ring-red-500 outline-none rounded text-sm font-medium price-input">
+                </td>
+                <td class="px-4 py-3 text-right text-sm font-bold text-red-600">
+                    <span class="row-total">0</span>
+                </td>
+                <td class="px-2 py-2 text-center">
+                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors remove-row-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+            updateItemCount();
+            attachListeners(newRow);
+        });
+
+        // --- Customer Search ---
+        const custInput = document.getElementById('custName');
+        const custResults = document.getElementById('custAutocomplete');
+        let custTimeout;
+
+        custInput.addEventListener('input', () => {
+            const query = custInput.value.trim();
+            if (query.length < 2) {
+                custResults.classList.add('hidden');
+                return;
+            }
+            clearTimeout(custTimeout);
+            custTimeout = setTimeout(() => {
+                fetch(`/api/search-customer/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        custResults.innerHTML = '';
+                        if (data.results.length > 0) {
+                            data.results.forEach(c => {
+                                const div = document.createElement('div');
+                                div.className = 'p-3 hover:bg-red-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors';
+                                div.innerHTML = `<div class="font-bold text-gray-900">${c.name}</div><div class="text-xs text-gray-500">${c.phone} | ${c.car_register_no || '-'}</div>`;
+                                div.onclick = () => selectCustomer(c);
+                                custResults.appendChild(div);
+                            });
+                            custResults.classList.remove('hidden');
+                        } else {
+                            custResults.classList.add('hidden');
+                        }
+                    });
+            }, 300);
+        });
+
+        custInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const items = custResults.children;
+                if (items.length > 0 && !custResults.classList.contains('hidden')) {
+                    items[0].click();
+                }
+            }
+        });
+
+        function selectCustomer(c) {
+            document.getElementById('custName').value = c.name;
+            document.getElementById('custPhone').value = c.phone;
+            document.getElementById('custCode').value = c.code;
+            document.getElementById('carReg').value = c.car_register_no || '';
+            document.getElementById('carProv').value = c.car_province || '';
+            document.getElementById('carBrand').value = c.car_brand || '';
+            document.getElementById('carModel').value = c.car_model || '';
+            document.getElementById('carFrame').value = c.car_frame_no || '';
+            document.getElementById('carColor').value = c.car_color || '';
+            custResults.classList.add('hidden');
+        }
+
+        // --- Product Search & Focus ---
+        function attachListeners(row) {
+            const descInput = row.querySelector('.desc-input');
+            const prodResults = row.querySelector('.prod-autocomplete');
+            let prodTimeout;
+
+            descInput.addEventListener('input', () => {
+                const query = descInput.value.trim();
+                if (query.length < 2) {
+                    prodResults.classList.add('hidden');
+                    return;
+                }
+                clearTimeout(prodTimeout);
+                prodTimeout = setTimeout(() => {
+                    fetch(`/api/search-product/?q=${encodeURIComponent(query)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            prodResults.innerHTML = '';
+                            if (data.results.length > 0) {
+                                data.results.forEach(p => {
+                                    const div = document.createElement('div');
+                                    div.className = 'p-2 hover:bg-red-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors text-sm';
+                                    div.innerHTML = `<div class="font-bold text-gray-900">${p.name}</div><div class="text-xs text-gray-500">${p.barcode} | ฿${p.price}</div>`;
+                                    div.onclick = () => selectProduct(row, p);
+                                    prodResults.appendChild(div);
+                                });
+                                prodResults.classList.remove('hidden');
+                            } else {
+                                prodResults.classList.add('hidden');
+                            }
+                        });
+                }, 300);
+            });
+
+            descInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const items = prodResults.children;
+                    if (items.length > 0 && !prodResults.classList.contains('hidden')) {
+                        items[0].click();
+                    } else {
+                        row.querySelector('.qty-input').focus();
+                    }
+                }
+            });
+
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', calculateTotals);
+                if (!input.classList.contains('desc-input')) {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const inputs = Array.from(row.querySelectorAll('input'));
+                            const idx = inputs.indexOf(input);
+                            if (idx < inputs.length - 1) {
+                                const nextInput = inputs[idx+1];
+                                if (nextInput) nextInput.focus();
+                            } else {
+                                if (input.classList.contains('price-input')) {
+                                    addRowBtn.click();
+                                    const lastRow = tableBody.lastElementChild;
+                                    const lastDesc = lastRow.querySelector('.desc-input');
+                                    if (lastDesc) lastDesc.focus();
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            row.querySelector('.remove-row-btn').addEventListener('click', () => {
+                if (tableBody.querySelectorAll('tr').length > 1) {
+                    row.remove();
+                    updateItemCount();
+                    calculateTotals();
+                }
+            });
+        }
+
+        function selectProduct(row, p) {
+            const refCode = row.querySelector('input[name^="ref_code_"]');
+            const desc = row.querySelector('.desc-input');
+            const price = row.querySelector('.price-input');
+            const unit = row.querySelector('input[name^="unit_"]');
+            
+            if (refCode) refCode.value = p.barcode;
+            if (desc) desc.value = p.name;
+            if (price) price.value = p.price;
+            if (unit) unit.value = p.unit || 'ອັນ';
+            
+            row.querySelector('.prod-autocomplete').classList.add('hidden');
+            calculateTotals();
+            const qtyInput = row.querySelector('.qty-input');
+            if (qtyInput) qtyInput.focus();
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.relative')) {
+                document.querySelectorAll('.prod-autocomplete, #custAutocomplete').forEach(el => el.classList.add('hidden'));
+            }
+        });
+
+        // Initial listeners
+        tableBody.querySelectorAll('tr').forEach(attachListeners);
+        taxPercentInput.addEventListener('input', calculateTotals);
+        calculateTotals();
+    </script>
+{% endblock %}

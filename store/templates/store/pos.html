@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     /* Modern Retail POS Style - Like 7-Eleven, Big C, Lotus */
-    .pos-container { max-width: 1400px; margin: 20px auto; padding: 0 15px; }
+    .pos-container { max-width: 1800px; margin: 20px auto; padding: 0 15px; }
     .pos-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
 
     @media (max-width: 1024px) {
@@ -555,6 +555,69 @@
         grid-column: 1 / -1;
     }
 
+    /* Customer Autocomplete */
+    .customer-search-wrapper {
+        position: relative;
+    }
+
+    .customer-autocomplete {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid #3b82f6;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        display: none;
+    }
+    .dark-mode .customer-autocomplete { background: #2d2d2d; border-color: #3b82f6; }
+
+    .customer-autocomplete.active {
+        display: block;
+    }
+
+    .autocomplete-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #e5e7eb;
+        transition: background 0.2s;
+    }
+    .dark-mode .autocomplete-item { border-color: #444; }
+
+    .autocomplete-item:hover {
+        background: #dbeafe;
+    }
+    .dark-mode .autocomplete-item:hover { background: #374151; }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1f2937;
+        margin-bottom: 3px;
+    }
+    .dark-mode .autocomplete-name { color: #f3f4f6; }
+
+    .autocomplete-phone {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+    .dark-mode .autocomplete-phone { color: #9ca3af; }
+
+    .autocomplete-car {
+        font-size: 0.85rem;
+        color: #3b82f6;
+        margin-top: 3px;
+    }
+
 </style>
 {% endblock %}
 
@@ -598,7 +661,53 @@
             <div class="total-section">
                 <div class="total-label">💰 ຍອດລວມທັງໝົດ</div>
                 <div class="total-display" id="grand-total">0.00</div>
-                <div style="text-align: center; margin-top: 10px; font-size: 0.9rem;">ກີບ LAK</div>
+                <div style="text-align: center; margin-top: 10px; font-size: 0.9rem;">฿ ບາດ (THB)</div>
+            </div>
+
+            <!-- Customer & Vehicle Info -->
+            <div class="pos-card" style="padding: 15px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 1.1rem;">👤 ລູກຄ້າ (Customer)</h3>
+                    <a href="{% url 'customer-registration' %}" target="_blank" style="font-size: 0.75rem; color: #dc2626; font-weight: 700; text-decoration: none; background: #fff1f2; padding: 2px 8px; border-radius: 6px; border: 1px solid #fecaca;">+ ລົງທະບຽນໃໝ່</a>
+                </div>
+                <div style="display: grid; gap: 10px;">
+                    <!-- Search -->
+                    <div class="customer-search-wrapper">
+                        <input type="text" id="cust-search" placeholder="🔍 ຄົ້ນຫາລູກຄ້າ (ຊື່/ເບີໂທ)" class="barcode-input" style="font-size: 1rem; padding: 8px;" autocomplete="off">
+                        <div id="customer-autocomplete" class="customer-autocomplete"></div>
+                    </div>
+
+                    <!-- Selected Customer Display -->
+                    <div id="selected-customer-display" style="display: none; background: #fff; padding: 12px; border-radius: 12px; border: 2px solid #fee2e2; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span id="display-name" style="font-weight: 800; color: #111827; font-size: 1.1rem;"></span>
+                                    <span id="display-code" style="background: #fef2f2; color: #dc2626; font-size: 0.75rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; border: 1px solid #fecaca;"></span>
+                                </div>
+                                <div id="display-phone" style="font-size: 0.95rem; color: #4b5563; font-weight: 500;"></div>
+                                <div id="display-car" style="font-size: 0.9rem; color: #b91c1c; font-weight: 700; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                                    <span id="display-car-info"></span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearSelectedCustomer()" style="background: #f3f4f6; border: none; color: #6b7280; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s;">&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Inputs for Checkout Logic -->
+                    <input type="hidden" id="cust-code">
+                    <input type="hidden" id="cust-name">
+                    <input type="hidden" id="cust-phone">
+                    <input type="hidden" id="car-reg">
+                    <input type="hidden" id="car-prov">
+                    <input type="hidden" id="car-mileage">
+                    <input type="hidden" id="car-brand">
+                    <input type="hidden" id="car-model">
+                    <input type="hidden" id="car-frame">
+                    <input type="hidden" id="car-color">
+                    <input type="hidden" id="mech-name">
+                    <input type="hidden" id="sale-rep" value="{{ request.user.username }}">
+                </div>
             </div>
 
             <div class="summary-items">
@@ -612,7 +721,7 @@
                 </div>
                 <div class="summary-row total">
                     <span>ລວມທັງໝົດ:</span>
-                    <span id="grand-total-summary">0.00 ກີບ</span>
+                    <span id="grand-total-summary">0.00 ฿</span>
                 </div>
             </div>
 
@@ -822,9 +931,125 @@
     // Load cart on page load
     loadCart();
 
-    // Focus ຊ່ອງຍິງຕະຫຼອດເວລາ
+    // === Customer Autocomplete ===
+    const custSearch = document.getElementById('cust-search');
+    const custAutocomplete = document.getElementById('customer-autocomplete');
+    let searchTimeout;
+    let selectedCustomer = null;
+
+    // ຄົ້ນຫາລູກຄ້າ
+    custSearch.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+
+        if (query.length < 2) {
+            custAutocomplete.classList.remove('active');
+            custAutocomplete.innerHTML = '';
+            return;
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/search-customer/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        let html = '';
+                        data.results.forEach(customer => {
+                            const carInfo = customer.car_brand && customer.car_model
+                                ? `🚗 ${customer.car_brand} ${customer.car_model} - ${customer.car_register_no || ''}`
+                                : '';
+
+                            html += `
+                                <div class="autocomplete-item" data-customer='${JSON.stringify(customer)}'>
+                                    <div class="autocomplete-name">${customer.name || 'N/A'}</div>
+                                    <div class="autocomplete-phone">📱 ${customer.phone || 'N/A'}</div>
+                                    ${carInfo ? `<div class="autocomplete-car">${carInfo}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        custAutocomplete.innerHTML = html;
+                        custAutocomplete.classList.add('active');
+
+                        // ເພີ່ມ event listener ສຳລັບແຕ່ລະລາຍການ
+                        document.querySelectorAll('.autocomplete-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const customer = JSON.parse(this.dataset.customer);
+                                fillCustomerData(customer);
+                                custAutocomplete.classList.remove('active');
+                                custSearch.value = '';
+                            });
+                        });
+                    } else {
+                        custAutocomplete.classList.remove('active');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error searching customer:', err);
+                    custAutocomplete.classList.remove('active');
+                });
+        }, 300); // Debounce 300ms
+    });
+
+    // ປິດ autocomplete ເມື່ອຄລິກນອກ
+    document.addEventListener('click', function(e) {
+        if (!custSearch.contains(e.target) && !custAutocomplete.contains(e.target)) {
+            custAutocomplete.classList.remove('active');
+        }
+    });
+
+    // ຟັງຊັນຕື່ມຂໍ້ມູນລູກຄ້າ
+    function fillCustomerData(customer) {
+        document.getElementById('cust-code').value = customer.code || '';
+        document.getElementById('cust-name').value = customer.name || '';
+        document.getElementById('cust-phone').value = customer.phone || '';
+        document.getElementById('car-reg').value = customer.car_register_no || '';
+        document.getElementById('car-prov').value = customer.car_province || '';
+        document.getElementById('car-brand').value = customer.car_brand || '';
+        document.getElementById('car-model').value = customer.car_model || '';
+        document.getElementById('car-frame').value = customer.car_frame_no || '';
+        document.getElementById('car-color').value = customer.car_color || '';
+
+        // Update Display UI
+        document.getElementById('display-name').innerText = customer.name || 'Unknown';
+        document.getElementById('display-code').innerText = customer.code || '';
+        document.getElementById('display-phone').innerText = '📱 ' + (customer.phone || 'N/A');
+        
+        const carInfoText = customer.car_brand || customer.car_register_no 
+            ? `🚗 ${customer.car_brand || ''} ${customer.car_model || ''} [${customer.car_register_no || '-'}]`
+            : '🚗 No vehicle info';
+        document.getElementById('display-car-info').innerText = carInfoText;
+        
+        document.getElementById('selected-customer-display').style.display = 'block';
+
+        selectedCustomer = customer;
+        showMsg(`✅ ເລືອກລູກຄ້າ: ${customer.name} (${customer.code})`, false);
+    }
+
+    window.clearSelectedCustomer = function() {
+        document.getElementById('cust-code').value = '';
+        document.getElementById('cust-name').value = '';
+        document.getElementById('cust-phone').value = '';
+        document.getElementById('car-reg').value = '';
+        document.getElementById('car-prov').value = '';
+        document.getElementById('car-brand').value = '';
+        document.getElementById('car-model').value = '';
+        document.getElementById('car-frame').value = '';
+        document.getElementById('car-color').value = '';
+        document.getElementById('car-mileage').value = '';
+        
+        document.getElementById('selected-customer-display').style.display = 'none';
+        selectedCustomer = null;
+        input.focus();
+    }
+
+    // Focus ຊ່ອງຍິງຕະຫຼອດເວລາ (ຍົກເວັ້ນຕອນກຳລັງພິມຂໍ້ມູນອື່ນ)
     input.focus();
-    document.addEventListener('click', () => input.focus());
+    document.addEventListener('click', (e) => {
+        // ຖ້າບໍ່ໄດ້ຄລິກໃສ່ input ຫຼື select ຫຼື textarea ໃຫ້ focus ທີ່ຊ່ອງ barcode
+        if (!['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+            input.focus();
+        }
+    });
 
     // ດັກຈັບການຍິງບາໂຄດ
     input.addEventListener('keypress', function(e) {
@@ -916,7 +1141,7 @@
         const defaultImg = 'https://via.placeholder.com/300x200?text=No+Image';
         document.getElementById('preview-img').src = product.image || defaultImg;
         document.getElementById('preview-name').innerText = product.name;
-        document.getElementById('preview-price').innerText = product.price.toLocaleString() + ' ກີບ';
+        document.getElementById('preview-price').innerText = product.price.toLocaleString() + ' ฿';
 
         productPreview.style.display = 'block';
         setTimeout(() => {
@@ -959,7 +1184,7 @@
 
                     <div class="cart-item-info">
                         <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">${item.price.toLocaleString()} ກີບ</div>
+                        <div class="cart-item-price">${item.price.toLocaleString()} ฿</div>
                     </div>
 
                     <div class="cart-item-controls">
@@ -968,7 +1193,7 @@
                             <span class="qty-display">${item.qty}</span>
                             <button onclick="updateQty(${index}, 1)" class="qty-btn">+</button>
                         </div>
-                        <div class="item-total">${itemTotal.toLocaleString()} ກີບ</div>
+                        <div class="item-total">${itemTotal.toLocaleString()} ฿</div>
                         <button onclick="removeItem(${index})" class="btn-remove">ລຶບ</button>
                     </div>
                 </div>
@@ -983,7 +1208,7 @@
     // === Update Summary Panel ===
     function updateSummary(total, items, qty) {
         totalDisplay.innerText = total.toLocaleString();
-        totalSummary.innerText = total.toLocaleString() + ' ກີບ';
+        totalSummary.innerText = total.toLocaleString() + ' ฿';
         itemCount.innerText = items;
         totalQty.innerText = qty;
     }
@@ -1026,7 +1251,7 @@
         // Populate checkout modal
         document.getElementById('modal-item-count').innerText = cart.length;
         document.getElementById('modal-total-qty').innerText = totalQtyValue;
-        document.getElementById('modal-grand-total').innerText = total.toLocaleString() + ' ກີບ';
+        document.getElementById('modal-grand-total').innerText = total.toLocaleString() + ' ฿';
 
         // Populate items list
         let itemsHTML = '';
@@ -1035,7 +1260,7 @@
                 <div class="receipt-item">
                     <span class="receipt-item-name">${item.name}</span>
                     <span class="receipt-item-qty">x${item.qty}</span>
-                    <span class="receipt-item-price">${(item.price * item.qty).toLocaleString()} ກີບ</span>
+                    <span class="receipt-item-price">${(item.price * item.qty).toLocaleString()} ฿</span>
                 </div>
             `;
         });
@@ -1052,6 +1277,24 @@
 
     window.confirmCheckout = function() {
         const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        
+        const customerData = {
+            name: document.getElementById('cust-name').value,
+            phone: document.getElementById('cust-phone').value
+        };
+        const carData = {
+            register_no: document.getElementById('car-reg').value,
+            province: document.getElementById('car-prov').value,
+            brand: document.getElementById('car-brand').value,
+            model: document.getElementById('car-model').value,
+            frame_no: document.getElementById('car-frame').value,
+            color: document.getElementById('car-color').value,
+            mileage: document.getElementById('car-mileage').value
+        };
+        const mechanicData = {
+            mechanic: document.getElementById('mech-name').value,
+            sale_rep: document.getElementById('sale-rep').value
+        };
 
         checkoutModal.classList.remove('active');
         showMsg('⏳ ກຳລັງບັນທຶກ...', false);
@@ -1060,22 +1303,45 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ items: cart })
+            body: JSON.stringify({ 
+                items: cart,
+                customer: customerData,
+                car: carData,
+                mechanic: mechanicData
+            })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 cashSound.play();
 
-                // Show success modal
-                document.getElementById('success-total').innerText = total.toLocaleString() + ' ກີບ';
-                successModal.classList.add('active');
-
                 // Clear cart and localStorage
                 cart = [];
                 clearCartStorage();
                 renderCart();
+                
+                // Clear inputs
+                document.getElementById('cust-code').value = '';
+                document.getElementById('cust-name').value = '';
+                document.getElementById('cust-phone').value = '';
+                document.getElementById('car-reg').value = '';
+                document.getElementById('car-prov').value = '';
+                document.getElementById('car-brand').value = '';
+                document.getElementById('car-model').value = '';
+                document.getElementById('mech-name').value = '';
+
+                // Show success modal with link to bill
+                document.getElementById('success-total').innerText = total.toLocaleString() + ' ฿';
+                const successMsg = document.querySelector('#success-modal .modal-message');
+                successMsg.innerHTML = `
+                    <p>🎉 ຂາຍສຳເລັດ!</p>
+                    <a href="/orders/${data.invoice_no}/" target="_blank" class="modal-btn modal-btn-primary" style="display: inline-block; text-decoration: none; margin-top: 15px;">
+                        📄 ເບິ່ງໃບບິນ (View Bill)
+                    </a>
+                `;
+                successModal.classList.add('active');
             } else {
                 showMsg('❌ ເກີດຂໍ້ຜິດພາດ: ' + data.error, true);
                 input.focus();

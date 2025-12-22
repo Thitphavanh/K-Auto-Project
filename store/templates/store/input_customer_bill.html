@@ -1,0 +1,608 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}ສ້າງບິນໃໝ່ (Input Bill){% endblock %}
+
+{% block content %}
+<div class="max-w-[1800px] mx-auto bg-white p-4 md:p-8 rounded-xl shadow-sm border border-gray-100">
+    <!-- Branding Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b-4 border-red-600 gap-6">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="bg-gradient-to-br from-red-600 to-red-700 text-white w-20 h-20 flex items-center justify-center rounded-2xl font-bold text-4xl shadow-lg border-2 border-white/20">K</div>
+            <div class="text-center md:text-left">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-red-600 mb-1 lg:tracking-tight">K AUTO LAO SERVICE</h2>
+                <p class="text-gray-500 font-medium text-sm">ວິສາຫະກິດສ່ວນບຸກຄົນອູ່ສ້ອມແປງລົດ ເຄເອໂຕ້ລາວ ເຊີວິສ</p>
+                <div class="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-1 mt-2 text-gray-400 text-xs">
+                    <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-red-500"></i> ບ້ານນາເລົ່າ ເມືອງໄກສອນພົມວິຫານ ແຂວງສະຫວັນນະເຂດ</span>
+                    <span class="flex items-center gap-1"><i class="fas fa-phone-alt text-green-500"></i> +856 20 96966610 / 96964449</span>
+                </div>
+            </div>
+        </div>
+        <div class="text-right flex flex-col items-end gap-2">
+            <h2 class="text-3xl font-black text-red-600 lg:tracking-wide">ໃບບິນ / INVOICE</h2>
+            <div class="flex flex-col items-end gap-1">
+                <p class="text-gray-600 font-bold">ວັນທີ: <span class="text-blue-600 underline">{% now "d-M-Y" %}</span></p>
+                <p class="text-xs font-bold px-3 py-1 bg-gray-100 text-gray-500 rounded-full border border-gray-200 uppercase tracking-tighter">AUTO-GEN</p>
+            </div>
+        </div>
+    </div>
+
+    <form id="billForm">
+        <!-- Section 1: Customer & Car Info -->
+        <div class="mb-10">
+            <div class="bg-gray-100 px-4 py-2 font-bold text-gray-800 border-l-4 border-red-600 mb-6 flex items-center gap-2">
+                <i class="fas fa-user-tag text-red-600"></i> ຂໍ້ມູນລູກຄ້າ ແລະ ລົດ / Customer & Vehicle Information
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+                <!-- Customer Name Search -->
+                <div class="md:col-span-8 flex flex-col gap-1.5 relative">
+                    <label class="block text-sm font-bold text-gray-700">ລູກຄ້າ / Customer</label>
+                    <div class="relative">
+                        <input type="text" id="cust_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="🔍 ຄົ້ນຫາຊື່ ຫຼື ເບີໂທ..." autocomplete="off">
+                        <div id="cust_autocomplete" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-[1000] max-h-60 overflow-y-auto"></div>
+                    </div>
+                    <p class="text-xs font-medium text-gray-400 mt-1 flex items-center gap-1">
+                        <i class="fas fa-phone-alt"></i> ເບີໂທ: <span id="cust_phone_display" class="text-gray-600 font-bold">-</span>
+                    </p>
+                    <input type="hidden" id="cust_phone">
+                    <input type="hidden" id="cust_id">
+                </div>
+                <!-- Customer Code -->
+                <div class="md:col-span-4 flex flex-col gap-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ລະຫັດລູກຄ້າ / Code</label>
+                    <input type="text" id="cust_code" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 font-bold outline-none" readonly placeholder="Auto">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Car Reg & Province -->
+                <div class="lg:col-span-2 grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ທະບຽນລົດ / Reg. No</label>
+                        <input type="text" id="car_reg" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ທະບຽນ">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ແຂວງ / Province</label>
+                        <input type="text" id="car_prov" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ແຂວງ">
+                    </div>
+                </div>
+                <!-- Mileage -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ເລກ km / Mileage</label>
+                    <input type="number" id="car_mileage" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="0">
+                </div>
+                <div class="hidden lg:block space-y-1.5"></div> <!-- Spacer -->
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Brand & Model -->
+                <div class="lg:col-span-2 grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ຍີ່ຫໍ້ / Brand</label>
+                        <input type="text" id="car_brand" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ຍີ່ຫໍ້">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ລຸ້ນ / Model</label>
+                        <input type="text" id="car_model" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ລຸ້ນ">
+                    </div>
+                </div>
+                <!-- Frame No & Color -->
+                <div class="lg:col-span-2 grid grid-cols-3 gap-3">
+                    <div class="col-span-2 flex flex-col gap-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ເລກຖັງ / Frame No</label>
+                        <input type="text" id="car_frame" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ເລກຖັງ">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ສີ / Color</label>
+                        <input type="text" id="car_color" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ສີ">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Mechanic & Sales Rep -->
+                <div class="lg:col-span-2 flex flex-col gap-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ຊ່າງສ້ອມ / Mechanic</label>
+                    <input type="text" id="mechanic_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ຊື່ຊ່າງ">
+                </div>
+                <div class="lg:col-span-2 flex flex-col gap-1.5">
+                    <label class="block text-sm font-bold text-gray-700">ພະນັກງານຂາຍ / Sales Rep.</label>
+                    <input type="text" id="sale_rep" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all font-bold text-gray-700" value="{{ request.user.username }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Items Table -->
+        <div class="mb-10">
+            <div class="bg-gray-100 px-4 py-2 font-bold text-gray-800 border-l-4 border-red-600 mb-6 flex justify-between items-center">
+                <span class="flex items-center gap-2"><i class="fas fa-boxes text-red-600"></i> ລາຍການສິນຄ້າ / Items</span>
+                <button type="button" class="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-800 text-white text-sm font-bold rounded hover:bg-gray-900 transition-all shadow-sm" onclick="addRow()">
+                    <i class="fas fa-plus"></i> ເພີ່ມລາຍການ
+                </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mb-6">
+                <table class="w-full text-left border-collapse min-w-[1000px]" id="itemsTable">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            <th class="px-4 py-3 text-center w-12">No</th>
+                            <th class="px-4 py-3 w-40">Ref. Code</th>
+                            <th class="px-4 py-3">ລາຍການ / Description</th>
+                            <th class="px-4 py-3 w-28 text-center">ຈຳນວນ / Qty</th>
+                            <th class="px-4 py-3 w-28 text-center">ໜ່ວຍ / Unit</th>
+                            <th class="px-4 py-3 w-40 text-right">ລາຄາ / Price</th>
+                            <th class="px-4 py-3 w-40 text-center text-xs">ສ່ວນຫຼຸດ %</th>
+                            <th class="px-4 py-3 w-40 text-right">ຈຳນວນເງິນ / Amount</th>
+                            <th class="px-4 py-3 w-12 text-center"><i class="fas fa-trash"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        <!-- Dynamic Rows Here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 4: Totals & Payment -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div>
+                <div class="bg-gray-100 px-4 py-2 font-bold text-gray-800 border-l-4 border-red-600 mb-6 flex items-center gap-2">
+                    <i class="fas fa-money-bill-wave text-red-600"></i> ການຈ່າຍເງິນ / Payment
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-gray-700">ຜູ້ຮັບເງິນ / Received By</label>
+                        <input type="text" id="received_by" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ຊື່ຜູ້ຮັບເງິນ">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-gray-700">ເລກທີເຊັກ / Check No.</label>
+                            <input type="text" id="check_no" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ເລກທີເຊັກ">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-gray-700">ວັນທີໃນເຊັກ / Date</label>
+                            <input type="date" id="check_date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-gray-700">ທະນາຄານ / Bank</label>
+                            <input type="text" id="bank_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ຊື່ທະນາຄານ">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-gray-700">ສາຂາ / Branch</label>
+                            <input type="text" id="bank_branch" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ສາຂາ">
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-xl border border-yellow-200 shadow-sm">
+                        <table class="w-full text-sm">
+                            <thead class="bg-yellow-100/50 border-b border-yellow-200">
+                                <tr class="text-left font-bold text-yellow-800">
+                                    <th class="px-4 py-3">ວິທີຈ່າຍ / Method</th>
+                                    <th class="px-4 py-3 text-right">ຈຳນວນ / Amount (฿)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-yellow-100 bg-yellow-50/30">
+                                <tr class="hover:bg-yellow-50 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" id="cash_check" class="rounded text-yellow-600 focus:ring-yellow-500">
+                                            <span class="font-medium text-gray-700 underline decoration-yellow-300">ເງິນສົດ / Cash</span>
+                                        </label>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <input type="number" id="payment_cash" class="w-full px-3 py-1.5 border border-yellow-200 rounded-lg text-right focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all font-bold text-yellow-900" value="0" step="0.01" oninput="calcPaymentTotal()">
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-yellow-50 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" id="check_check" class="rounded text-yellow-600 focus:ring-yellow-500">
+                                            <span class="font-medium text-gray-700 underline decoration-yellow-300">ເຊັກທະນາຄານ / Check</span>
+                                        </label>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <input type="number" id="payment_check" class="w-full px-3 py-1.5 border border-yellow-200 rounded-lg text-right focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all font-bold text-yellow-900" value="0" step="0.01" oninput="calcPaymentTotal()">
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-yellow-50 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" id="credit_check" class="rounded text-yellow-600 focus:ring-yellow-500">
+                                            <span class="font-medium text-gray-700 underline decoration-yellow-300">ຕິດໜີ້ / Credit</span>
+                                        </label>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <input type="number" id="payment_credit" class="w-full px-3 py-1.5 border border-yellow-200 rounded-lg text-right focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all font-bold text-yellow-900" value="0" step="0.01" oninput="calcPaymentTotal()">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col justify-between">
+                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                    <h5 class="font-bold text-gray-800 flex items-center gap-2 mb-2">
+                        <i class="fas fa-calculator text-red-600"></i> ຍອດລວມ / Summary
+                    </h5>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 font-medium whitespace-nowrap">ລວມຍອດສ່ວນຫຼຸດ / Total Discount</span>
+                            <span class="font-bold text-red-600" id="total_discount_display">0.00 ฿</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 font-medium whitespace-nowrap">ລວມຍອດລວມ / Subtotal</span>
+                            <span class="font-bold text-gray-900" id="subtotal_display">0.00 ฿</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-500 font-medium whitespace-nowrap">ອາກອນ / Tax</span>
+                                <input type="number" id="tax_percent" value="0" step="0.01" class="w-16 px-2 py-0.5 border border-gray-200 rounded text-center text-xs outline-none focus:ring-1 focus:ring-red-500" oninput="calcGrandTotal()">
+                                <span class="text-xs font-bold text-gray-400">%</span>
+                            </div>
+                            <span class="font-bold text-gray-900" id="tax_amount_display">0.00 ฿</span>
+                        </div>
+                        <div class="pt-4 border-t border-gray-200">
+                            <div class="flex justify-between items-end mb-4">
+                                <span class="text-lg font-bold text-gray-900">ລວມສຸດທິ / Net Total (THB)</span>
+                                <span class="text-4xl font-black text-blue-600" id="grand_total_thb_display">0.00 ฿</span>
+                            </div>
+                            <div class="space-y-1 pl-1 border-l-2 border-gray-200">
+                                <div class="flex justify-between items-center text-xs text-gray-400 italic">
+                                    <span>Estimated LAK (₭)</span>
+                                    <span id="grand_total_lak_display">0.00 ₭</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-gray-400 italic">
+                                    <span>Estimated USD ($)</span>
+                                    <span id="grand_total_usd_display">0.00 $</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-8">
+                    <button type="button" class="w-full py-4 bg-gray-900 text-white rounded-xl font-black text-xl shadow-xl hover:bg-black transition-all active:scale-[0.98] border-b-4 border-gray-700 flex items-center justify-center gap-3 uppercase tracking-wider" onclick="submitBill()">
+                        <i class="fas fa-save shadow-sm"></i>
+                        <span>ບັນທຶກ ແລະ ອອກບິນ / Save & Print Bill</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    // Exchange Rates (Passed from View preferably, or hardcoded for now then updated via API)
+    // For manual entry, we'll let the backend handle the final conversion, but we can show estimates.
+    const rateLak = parseFloat("{{ rate_lak|default:0 }}");
+    const rateUsd = parseFloat("{{ rate_usd|default:0 }}");
+
+    // --- Customer Search Logic ---
+    const custInput = document.getElementById('cust_name');
+    const custResult = document.getElementById('cust_autocomplete');
+    let searchTimeout;
+
+    custInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+        if (query.length < 2) {
+            custResult.style.display = 'none';
+            return;
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/search-customer/?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    custResult.innerHTML = '';
+                    if (data.results.length > 0) {
+                        data.results.forEach(c => {
+                            const item = document.createElement('div');
+                            item.className = 'px-4 py-3 hover:bg-red-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors';
+                            item.innerHTML = `
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="font-bold text-gray-800">${c.name}</div>
+                                        <div class="text-xs text-gray-400 italic">${c.car_brand || '-'} ${c.car_model || '-'} | ${c.car_register_no || '-'}</div>
+                                    </div>
+                                    <div class="text-xs font-black text-red-600 bg-red-50 px-2 py-1 rounded-md border border-red-100">${c.code}</div>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <i class="fas fa-phone-alt mr-1"></i> ${c.phone}
+                                </div>
+                            `;
+                            item.onclick = () => selectCustomer(c);
+                            custResult.appendChild(item);
+                        });
+                        custResult.style.display = 'block';
+                        custResult.classList.remove('hidden');
+                    } else {
+                        custResult.style.display = 'none';
+                        custResult.classList.add('hidden');
+                    }
+                });
+        }, 300);
+    });
+
+    function selectCustomer(c) {
+        document.getElementById('cust_id').value = c.id;
+        document.getElementById('cust_code').value = c.code;
+        document.getElementById('cust_name').value = c.name;
+        document.getElementById('cust_phone').value = c.phone;
+        document.getElementById('cust_phone_display').innerText = c.phone;
+        
+        document.getElementById('car_reg').value = c.car_register_no || '';
+        document.getElementById('car_prov').value = c.car_province || '';
+        document.getElementById('car_brand').value = c.car_brand || '';
+        document.getElementById('car_model').value = c.car_model || '';
+        document.getElementById('car_frame').value = c.car_frame_no || '';
+        document.getElementById('car_color').value = c.car_colour || '';
+
+        custResult.style.display = 'none';
+    }
+
+    // --- Table Logic ---
+    let rowCount = 0;
+
+    function addRow() {
+        rowCount++;
+        const tbody = document.querySelector('#itemsTable tbody');
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50/50 transition-colors group';
+        tr.innerHTML = `
+            <td class="px-4 py-3 text-center text-sm font-medium text-gray-500">${rowCount}</td>
+            <td class="px-4 py-3">
+                <input type="text" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm item-refcode" placeholder="Ref.">
+            </td>
+            <td class="px-4 py-3 relative">
+                <input type="text" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm font-bold text-gray-700 item-desc" placeholder="ລາຍການສິນຄ້າ" autocomplete="off">
+                <div class="hidden absolute top-full left-4 right-4 bg-white border border-gray-200 rounded-b-lg shadow-xl z-[1000] max-h-60 overflow-y-auto prod-autocomplete"></div>
+            </td>
+            <td class="px-4 py-3">
+                <input type="number" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm text-center font-bold item-qty" value="1" oninput="calcTotal(this)">
+            </td>
+            <td class="px-4 py-3">
+                <input type="text" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm text-center item-unit" value="ອັນ">
+            </td>
+            <td class="px-4 py-3">
+                <input type="number" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm text-right font-bold item-price" value="0" step="0.01" oninput="calcTotal(this)">
+            </td>
+            <td class="px-4 py-3">
+                <input type="number" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-sm text-center font-bold text-red-600 item-disc-amount" placeholder="0%" value="0" step="0.1" oninput="calcTotal(this)">
+            </td>
+            <td class="px-4 py-3">
+                <input type="text" class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-right text-sm font-black text-blue-600 item-total" readonly value="0.00">
+            </td>
+            <td class="px-4 py-3 text-center">
+                <button type="button" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100" onclick="removeRow(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Add Product Autocomplete Event
+        const descInput = tr.querySelector('.item-desc');
+        const prodResult = tr.querySelector('.prod-autocomplete');
+        let prodTimeout;
+
+        descInput.addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            if (query.length < 2) {
+                prodResult.style.display = 'none';
+                return;
+            }
+
+            clearTimeout(prodTimeout);
+            prodTimeout = setTimeout(() => {
+                fetch(`/api/search-product/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        prodResult.innerHTML = '';
+                        if (data.results.length > 0) {
+                            data.results.forEach(p => {
+                                const item = document.createElement('div');
+                                item.className = 'px-4 py-2 hover:bg-red-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors';
+                                item.innerHTML = `
+                                    <div class="font-bold text-gray-800 text-sm">${p.name}</div>
+                                    <div class="text-xs text-gray-400 flex justify-between">
+                                        <span>Barcode: ${p.barcode}</span>
+                                        <span class="text-red-600 font-bold">฿${parseFloat(p.price).toLocaleString()}</span>
+                                    </div>
+                                `;
+                                item.onclick = () => selectProduct(tr, p);
+                                prodResult.appendChild(item);
+                            });
+                            prodResult.style.display = 'block';
+                            prodResult.classList.remove('hidden');
+                        } else {
+                            prodResult.style.display = 'none';
+                            prodResult.classList.add('hidden');
+                        }
+                    });
+            }, 300);
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', function(e) {
+            if (!descInput.contains(e.target) && !prodResult.contains(e.target)) {
+                prodResult.style.display = 'none';
+            }
+        });
+
+        // Handle Enter key on Description
+        descInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                // If there's exactly one result, select it
+                const firstItem = prodResult.querySelector('a');
+                if (firstItem && prodResult.style.display !== 'none') {
+                    firstItem.click();
+                } else {
+                    // Just move to Qty
+                    tr.querySelector('.item-qty').focus();
+                }
+            }
+        });
+    }
+
+    function selectProduct(tr, p) {
+        tr.querySelector('.item-refcode').value = p.barcode;
+        tr.querySelector('.item-desc').value = p.name;
+        tr.querySelector('.item-price').value = p.price;
+        tr.querySelector('.item-unit').value = p.unit || 'ອັນ';
+        tr.querySelector('.prod-autocomplete').style.display = 'none';
+        
+        calcTotal(tr.querySelector('.item-price'));
+        tr.querySelector('.item-qty').focus();
+    }
+
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+        calcGrandTotal();
+    }
+
+    function calcTotal(input) {
+        const tr = input.closest('tr');
+        const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
+        const price = parseFloat(tr.querySelector('.item-price').value) || 0;
+        let discPercent = parseFloat(tr.querySelector('.item-disc-amount').value) || 0;
+
+        const discountAmount = (price * qty * discPercent) / 100;
+        const subtotal = (price * qty) - discountAmount;
+        tr.querySelector('.item-total').value = subtotal.toFixed(2);
+
+        calcGrandTotal();
+    }
+
+    function calcGrandTotal() {
+        let subtotal = 0;
+        let totalDisc = 0;
+
+        document.querySelectorAll('#itemsTable tbody tr').forEach(tr => {
+            const price = parseFloat(tr.querySelector('.item-price').value) || 0;
+            const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
+            const discPercent = parseFloat(tr.querySelector('.item-disc-amount').value) || 0;
+            
+            const lineTotal = price * qty;
+            const discAmount = (lineTotal * discPercent) / 100;
+            const itemTotal = lineTotal - discAmount;
+            
+            subtotal += itemTotal;
+            totalDisc += discAmount;
+        });
+
+        // Calculate tax
+        const taxPercent = parseFloat(document.getElementById('tax_percent').value) || 0;
+        const taxAmount = (subtotal * taxPercent) / 100;
+        const grandTotal = subtotal + taxAmount;
+
+        // Update displays
+        document.getElementById('total_discount_display').innerText = totalDisc.toFixed(2) + ' ฿';
+        document.getElementById('subtotal_display').innerText = subtotal.toFixed(2) + ' ฿';
+        document.getElementById('tax_amount_display').innerText = taxAmount.toFixed(2) + ' ฿';
+        document.getElementById('grand_total_thb_display').innerText = grandTotal.toFixed(2) + ' ฿';
+
+        // Estimates for other currencies (Using multiplication based on user rate config)
+        const lak = rateLak > 0 ? (grandTotal * rateLak) : 0;
+        const usd = rateUsd > 0 ? (grandTotal * rateUsd) : 0;
+
+        document.getElementById('grand_total_lak_display').innerText = lak.toLocaleString(undefined, {maximumFractionDigits: 0}) + ' ₭';
+        document.getElementById('grand_total_usd_display').innerText = usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' $';
+    }
+
+    function calcPaymentTotal() {
+        // Auto-check boxes if amount > 0
+        const cash = parseFloat(document.getElementById('payment_cash').value) || 0;
+        const check = parseFloat(document.getElementById('payment_check').value) || 0;
+        const credit = parseFloat(document.getElementById('payment_credit').value) || 0;
+
+        document.getElementById('cash_check').checked = cash > 0;
+        document.getElementById('check_check').checked = check > 0;
+        document.getElementById('credit_check').checked = credit > 0;
+    }
+
+    // Initialize one row
+    addRow();
+
+    // --- Submit Logic ---
+    function submitBill() {
+        const items = [];
+        document.querySelectorAll('#itemsTable tbody tr').forEach(tr => {
+            items.push({
+                ref_code: tr.querySelector('.item-refcode').value,
+                desc: tr.querySelector('.item-desc').value,
+                qty: tr.querySelector('.item-qty').value,
+                unit: tr.querySelector('.item-unit').value,
+                price: tr.querySelector('.item-price').value,
+                discount: tr.querySelector('.item-disc-amount').value
+            });
+        });
+
+        const taxPercent = parseFloat(document.getElementById('tax_percent').value) || 0;
+
+        const data = {
+            customer: {
+                name: document.getElementById('cust_name').value,
+                phone: document.getElementById('cust_phone').value || document.getElementById('cust_phone_display').innerText,
+                code: document.getElementById('cust_code').value
+            },
+            car: {
+                register_no: document.getElementById('car_reg').value,
+                province: document.getElementById('car_prov').value,
+                brand: document.getElementById('car_brand').value,
+                model: document.getElementById('car_model').value,
+                frame: document.getElementById('car_frame').value,
+                color: document.getElementById('car_color').value,
+                mileage: document.getElementById('car_mileage').value
+            },
+            mechanic: {
+                name: document.getElementById('mechanic_name').value,
+                rep: document.getElementById('sale_rep').value
+            },
+            payment: {
+                received_by: document.getElementById('received_by').value,
+                check_no: document.getElementById('check_no').value,
+                check_date: document.getElementById('check_date').value,
+                bank_name: document.getElementById('bank_name').value,
+                bank_branch: document.getElementById('bank_branch').value,
+                amount_cash: parseFloat(document.getElementById('payment_cash').value) || 0,
+                amount_check: parseFloat(document.getElementById('payment_check').value) || 0,
+                amount_credit: parseFloat(document.getElementById('payment_credit').value) || 0
+            },
+            tax_percent: taxPercent,
+            items: items
+        };
+
+        // Reuse api_checkout or create new endpoint? 
+        // api_checkout expects "items" with ID (for products). Here we have manual items.
+        // We need a NEW endpoint for Manual Bill because api_checkout is tied to Stock/Product IDs.
+        // Manual bill might use free-text items.
+        
+        fetch('/api/manual-checkout/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.success) {
+                window.location.href = `/orders/${res.invoice_no}/`;
+            } else {
+                alert('Error: ' + res.error);
+            }
+        });
+    }
+</script>
+{% endblock %}

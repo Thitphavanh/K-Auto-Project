@@ -1,0 +1,474 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if is_update %}ແກ້ໄຂບິນ{% else %}ສ້າງບິນໃໝ່{% endif %} - K-Auto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #d00;
+            --dark-red: #900;
+            --light-gray: #f4f4f4;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Noto Sans Lao', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--primary-red);
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary-red);
+        }
+
+        /* Form Layout */
+        .section-title {
+            background: var(--light-gray);
+            padding: 10px 15px;
+            font-weight: bold;
+            border-left: 5px solid var(--primary-red);
+            margin: 20px 0 15px 0;
+            font-size: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .form-control {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 5px rgba(221, 0, 0, 0.1);
+        }
+
+        /* Table Style */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .items-table th, .items-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .items-table th {
+            background: #eee;
+            font-size: 13px;
+        }
+
+        .items-table td input {
+            width: 100%;
+            border: none;
+            text-align: center;
+            font-family: inherit;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .items-table td input:focus {
+            outline: 2px solid var(--primary-red);
+            background: white;
+        }
+
+        .text-left { text-align: left !important; }
+        .text-right { text-align: right !important; }
+
+        /* Totals */
+        .totals-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .totals-table {
+            width: 350px;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .totals-table .label { font-weight: bold; }
+        .totals-table .value { text-align: right; font-size: 18px; color: var(--primary-red); font-weight: bold; }
+
+        /* Buttons */
+        .btn-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary-red); color: white; }
+        .btn-primary:hover { background: var(--dark-red); }
+
+        .btn-light { background: #eee; color: #333; }
+        .btn-light:hover { background: #ddd; }
+
+        .add-row-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .remove-row-btn {
+            color: #dc3545;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <a href="{% url 'order_list' %}" style="color: var(--primary-red); font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+                    <h1><i class="fas fa-{% if is_update %}edit{% else %}plus-circle{% endif %}"></i> {% if is_update %}ແກ້ໄຂບິນ {{ order.invoice_no }}{% else %}ສ້າງບິນໃໝ່{% endif %}</h1>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ບັນທຶກບິນ</button>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="section-title">ຂໍ້ມູນລູກຄ້າ & ລົດ</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ວັນທີ</label>
+                    <input type="date" name="date" class="form-control" value="{{ order.date|date:'Y-m-d'|default:today|date:'Y-m-d' }}">
+                </div>
+                <div class="form-group">
+                    <label>ຊື່ລູກຄ້າ</label>
+                    <input type="text" name="customer_name" class="form-control" value="{{ order.customer_name|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>ເບີໂທ</label>
+                    <input type="text" name="customer_phone" class="form-control" value="{{ order.customer_phone|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ລະຫັດລູກຄ້າ</label>
+                    <input type="text" name="customer_code" class="form-control" value="{{ order.customer_code|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ທະບຽນລົດ</label>
+                    <input type="text" name="car_register_no" class="form-control" value="{{ order.car_register_no|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ແຂວງ</label>
+                    <input type="text" name="car_province" class="form-control" value="{{ order.car_province|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ຍີ່ຫໍ້</label>
+                    <input type="text" name="car_brand" class="form-control" value="{{ order.car_brand|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ລຸ້ນ</label>
+                    <input type="text" name="car_model" class="form-control" value="{{ order.car_model|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ເລກຖັງ (Frame No)</label>
+                    <input type="text" name="car_frame_no" class="form-control" value="{{ order.car_frame_no|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ສີລົດ</label>
+                    <input type="text" name="car_color" class="form-control" value="{{ order.car_color|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ກິໂລແມັດ (Mileage)</label>
+                    <input type="text" name="car_mileage" class="form-control" value="{{ order.car_mileage|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ຊ່າງສ້ອມແປງ</label>
+                    <input type="text" name="mechanic_name" class="form-control" value="{{ order.mechanic_name|default:'' }}">
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div class="section-title">ລາຍການສິນຄ້າ/ບໍລິການ</div>
+            <button type="button" class="add-row-btn" id="addRow"><i class="fas fa-plus"></i> ເພີ່ມລາຍການ</button>
+            <input type="hidden" name="item_count" id="itemCount" value="{{ items|length|default:1 }}">
+            
+            <div class="table-responsive">
+                <table class="items-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th width="50">#</th>
+                            <th width="150">Ref. Code</th>
+                            <th>Description</th>
+                            <th width="100">Quantity</th>
+                            <th width="100">Unit</th>
+                            <th width="150">Price</th>
+                            <th width="150">Total</th>
+                            <th width="50"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if items %}
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><input type="text" name="ref_code_{{ forloop.counter }}" value="{{ item.ref_code|default:'' }}"></td>
+                                <td class="text-left"><input type="text" name="description_{{ forloop.counter }}" value="{{ item.description }}" class="text-left" required></td>
+                                <td><input type="number" step="any" name="quantity_{{ forloop.counter }}" value="{{ item.quantity|floatformat:0 }}" class="qty-input"></td>
+                                <td><input type="text" name="unit_{{ forloop.counter }}" value="{{ item.unit|default:'ອັນ' }}"></td>
+                                <td><input type="number" step="any" name="unit_price_{{ forloop.counter }}" value="{{ item.unit_price|floatformat:0 }}" class="price-input"></td>
+                                <td class="text-right"><span class="row-total">{{ item.amount|floatformat:0 }}</span></td>
+                                <td><button type="button" class="remove-row-btn"><i class="fas fa-times"></i></button></td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td>1</td>
+                                <td><input type="text" name="ref_code_1" value=""></td>
+                                <td class="text-left"><input type="text" name="description_1" value="" class="text-left" required></td>
+                                <td><input type="number" step="any" name="quantity_1" value="1" class="qty-input"></td>
+                                <td><input type="text" name="unit_1" value="ອັນ"></td>
+                                <td><input type="number" step="any" name="unit_price_1" value="0" class="price-input"></td>
+                                <td class="text-right"><span class="row-total">0</span></td>
+                                <td><button type="button" class="remove-row-btn"><i class="fas fa-times"></i></button></td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="section-title">ການຈ່າຍເງິນ & ອາກອນ</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ອາກອນ (%)</label>
+                    <input type="number" step="any" name="tax_percent" id="taxPercent" class="form-control" value="{{ order.tax_percent|default:0 }}">
+                </div>
+                <div class="form-group">
+                    <label>ຈ່າຍສົດ (Cash Amount)</label>
+                    <input type="number" step="any" name="payment_amount_cash" class="form-control" value="{{ order.payment_amount_cash|default:0 }}">
+                    <div style="font-size: 11px; margin-top: 5px;">
+                        <input type="checkbox" name="payment_cash" id="chkCash" {% if order.payment_cash %}checked{% endif %}> <label for="chkCash" style="display:inline">ຈ່າຍສົດ</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ຈ່າຍແຊັກ (Check Amount)</label>
+                    <input type="number" step="any" name="payment_amount_check" class="form-control" value="{{ order.payment_amount_check|default:0 }}">
+                    <div style="font-size: 11px; margin-top: 5px;">
+                        <input type="checkbox" name="payment_check" id="chkCheck" {% if order.payment_check %}checked{% endif %}> <label for="chkCheck" style="display:inline">ຈ່າຍແຊັກ</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ຕິດໜີ້ (Credit Amount)</label>
+                    <input type="number" step="any" name="payment_amount_credit" class="form-control" value="{{ order.payment_amount_credit|default:0 }}">
+                    <div style="font-size: 11px; margin-top: 5px;">
+                        <input type="checkbox" name="payment_credit" id="chkCredit" {% if order.payment_credit %}checked{% endif %}> <label for="chkCredit" style="display:inline">ຕິດໜີ້</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ຜູ້ຮັບເງິນ</label>
+                    <input type="text" name="received_by" class="form-control" value="{{ order.received_by|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ເລກທີແຊັກ</label>
+                    <input type="text" name="check_no" class="form-control" value="{{ order.check_no|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ລົງວັນທີແຊັກ</label>
+                    <input type="date" name="check_date" class="form-control" value="{{ order.check_date|date:'Y-m-d'|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>ທະນາຄານ</label>
+                    <input type="text" name="bank_name" class="form-control" value="{{ order.bank_name|default:'' }}">
+                </div>
+            </div>
+
+            <!-- Totals Display -->
+            <div class="totals-container">
+                <table class="totals-table">
+                    <tr>
+                        <td class="label">ຍອດລວມ (Subtotal)</td>
+                        <td class="value" id="displaySubtotal">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label">ອາກອນ (Tax)</td>
+                        <td class="value" id="displayTax">0</td>
+                    </tr>
+                    <tr style="border-top: 2px solid var(--primary-red);">
+                        <td class="label" style="font-size: 20px;">ລວມທັງໝົດ (Total THB)</td>
+                        <td class="value" id="displayTotal" style="font-size: 24px;">0</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="btn-container">
+                <a href="{% url 'order_list' %}" class="btn btn-light">ຍົກເລີກ</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ບັນທຶກບິນ</button>
+            </div>
+            
+            <input type="hidden" name="sale_representative" value="{{ order.sale_representative|default:'' }}">
+        </form>
+    </div>
+
+    <script>
+        const tableBody = document.querySelector('#itemsTable tbody');
+        const addRowBtn = document.querySelector('#addRow');
+        const itemCountInput = document.querySelector('#itemCount');
+        const taxPercentInput = document.querySelector('#taxPercent');
+
+        function updateItemCount() {
+            const rows = tableBody.querySelectorAll('tr');
+            itemCountInput.value = rows.length;
+            rows.forEach((row, index) => {
+                const num = index + 1;
+                row.cells[0].textContent = num;
+                // Update input names for dynamic handling
+                row.querySelectorAll('input').forEach(input => {
+                    if (input.name) {
+                        const baseName = input.name.split('_');
+                        if (baseName.length > 1 && !isNaN(baseName[baseName.length-1])) {
+                           baseName.pop();
+                           input.name = baseName.join('_') + '_' + num;
+                        } else if (baseName.length === 1 || isNaN(baseName[baseName.length-1])) {
+                           // Handle names like 'unit_price' -> 'unit_price_1'
+                           input.name = input.name.replace(/_\d+$/, '') + '_' + num;
+                        }
+                    }
+                });
+            });
+        }
+
+        function calculateTotals() {
+            let subtotal = 0;
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                const total = qty * price;
+                row.querySelector('.row-total').textContent = total.toLocaleString();
+                subtotal += total;
+            });
+
+            const taxPercent = parseFloat(taxPercentInput.value) || 0;
+            const taxAmount = (subtotal * taxPercent) / 100;
+            const finalTotal = subtotal + taxAmount;
+
+            document.getElementById('displaySubtotal').textContent = subtotal.toLocaleString();
+            document.getElementById('displayTax').textContent = taxAmount.toLocaleString();
+            document.getElementById('displayTotal').textContent = finalTotal.toLocaleString();
+        }
+
+        addRowBtn.addEventListener('click', () => {
+            const rowCount = tableBody.querySelectorAll('tr').length + 1;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td><input type="text" name="ref_code_${rowCount}" value=""></td>
+                <td class="text-left"><input type="text" name="description_${rowCount}" value="" class="text-left" required></td>
+                <td><input type="number" step="any" name="quantity_${rowCount}" value="1" class="qty-input"></td>
+                <td><input type="text" name="unit_${rowCount}" value="ອັນ"></td>
+                <td><input type="number" step="any" name="unit_price_${rowCount}" value="0" class="price-input"></td>
+                <td class="text-right"><span class="row-total">0</span></td>
+                <td><button type="button" class="remove-row-btn"><i class="fas fa-times"></i></button></td>
+            `;
+            tableBody.appendChild(newRow);
+            updateItemCount();
+            attachListeners(newRow);
+        });
+
+        function attachListeners(row) {
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', calculateTotals);
+            });
+            row.querySelector('.remove-row-btn').addEventListener('click', () => {
+                if (tableBody.querySelectorAll('tr').length > 1) {
+                    row.remove();
+                    updateItemCount();
+                    calculateTotals();
+                }
+            });
+        }
+
+        // Initial listeners
+        tableBody.querySelectorAll('tr').forEach(attachListeners);
+        taxPercentInput.addEventListener('input', calculateTotals);
+        calculateTotals();
+    </script>
+</body>
+</html>

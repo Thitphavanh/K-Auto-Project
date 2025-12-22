@@ -59,7 +59,9 @@
 <body class="min-h-screen flex flex-col">
 
     <!-- Include Navbar -->
-    {% include 'includes/navbar.html' %}
+    {% block navbar %}
+        {% include 'includes/navbar.html' %}
+    {% endblock %}
 
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
@@ -67,7 +69,9 @@
     </main>
 
     <!-- Include Footer -->
-    {% include 'includes/footer.html' %}
+    {% block footer %}
+        {% include 'includes/footer.html' %}
+    {% endblock %}
 
     <!-- Language Switcher JavaScript -->
     <script src="{% static 'js/language-switcher.js' %}"></script>

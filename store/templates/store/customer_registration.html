@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ລົງທະບຽນລູກຄ້າ & ລົດ (Customer Registration){% endblock %}
+
+{% block content %}
+<div class="max-w-9xl mx-auto bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-gray-100 my-10">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-10 pb-6 border-b-2 border-red-600">
+        <div class="bg-red-600 text-white w-14 h-14 flex items-center justify-center rounded-xl font-bold text-2xl shadow-indigo-200">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <div>
+            <h1 class="text-2xl font-black text-gray-800 tracking-tight">ລົງທະບຽນລູກຄ້າ & ລົດ</h1>
+            <p class="text-gray-400 text-sm font-medium">Customer & Vehicle Registration</p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form id="customerForm" class="space-y-8">
+        <!-- Section 1: Customer Search & ID -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="md:col-span-8 relative">
+                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <i class="fas fa-search text-red-500"></i> ຄົ້ນຫາລູກຄ້າ (ຊື່/ເບີໂທ)
+                </label>
+                <input type="text" id="cust_search" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 outline-none transition-all font-medium" placeholder="🔍 ຄົ້ນຫາເພື່ອອັບເດດຂໍ້ມູນ..." autocomplete="off">
+                <div id="cust_autocomplete" class="hidden absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-xl shadow-2xl z-[1000] max-h-60 overflow-y-auto mt-1"></div>
+            </div>
+            <div class="md:col-span-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <i class="fas fa-id-card text-gray-400"></i> ລະຫັດ / Code
+                </label>
+                <input type="text" id="cust_code" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 font-bold outline-none" readonly placeholder="A-XXXXXX">
+                <input type="hidden" id="cust_id">
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
+        <!-- Section 2: Basic Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">ຊື່ລູກຄ້າ / Customer Name</label>
+                <input type="text" id="cust_name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 outline-none transition-all font-bold text-gray-800" placeholder="ຊື່ລູກຄ້າ">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">ເບີໂທ / Phone</label>
+                <input type="text" id="cust_phone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 outline-none transition-all font-bold text-gray-800" placeholder="ເບີໂທ">
+            </div>
+        </div>
+
+        <!-- Section 3: Vehicle Info -->
+        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-6">
+            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-car text-red-500"></i> ຂໍ້ມູນລົດ / Vehicle Details
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ທະບຽນລົດ / Reg. No</label>
+                    <input type="text" id="car_register_no" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ທະບຽນ">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ແຂວງ / Province</label>
+                    <input type="text" id="car_province" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ແຂວງ">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ເລກ km / Mileage</label>
+                    <input type="number" id="car_mileage" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="0">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ຍີ່ຫໍ້ / Brand</label>
+                    <input type="text" id="car_brand" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ຍີ່ຫໍ້">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ລຸ້ນ / Model</label>
+                    <input type="text" id="car_model" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ລຸ້ນ">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ເລກຖັງ / Frame No</label>
+                    <input type="text" id="car_frame_no" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ເລກຖັງ">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-600">ສີ / Color</label>
+                    <input type="text" id="car_color" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-all" placeholder="ສີ">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-6">
+            <button type="button" id="saveBtn" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black text-xl shadow-xl hover:bg-black transition-all active:scale-[0.98] flex items-center justify-center gap-3 group">
+                <i class="fas fa-save group-hover:scale-110 transition-transform"></i>
+                <span>ບັນທຶກຂໍ້ມູນ / Save Customer</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const searchInput = document.getElementById('cust_search');
+    const resultDiv = document.getElementById('cust_autocomplete');
+    const saveBtn = document.getElementById('saveBtn');
+    let searchTimeout;
+
+    // --- Search Logic ---
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+        if (query.length < 2) {
+            resultDiv.classList.add('hidden');
+            return;
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/search-customer/?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    resultDiv.innerHTML = '';
+                    if (data.results.length > 0) {
+                        data.results.forEach(c => {
+                            const item = document.createElement('div');
+                            item.className = 'px-4 py-3 hover:bg-red-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors';
+                            item.innerHTML = `
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="font-bold text-gray-800">${c.name}</div>
+                                        <div class="text-xs text-gray-400 italic">${c.car_brand || '-'} ${c.car_model || '-'} | ${c.car_register_no || '-'}</div>
+                                    </div>
+                                    <div class="text-xs font-black text-red-600 bg-red-50 px-2 py-1 rounded-md border border-red-100">${c.code}</div>
+                                </div>
+                            `;
+                            item.onclick = () => selectCustomer(c);
+                            resultDiv.appendChild(item);
+                        });
+                        resultDiv.classList.remove('hidden');
+                    } else {
+                        resultDiv.classList.add('hidden');
+                    }
+                });
+        }, 300);
+    });
+
+    function selectCustomer(c) {
+        document.getElementById('cust_id').value = c.id;
+        document.getElementById('cust_code').value = c.code;
+        document.getElementById('cust_name').value = c.name;
+        document.getElementById('cust_phone').value = c.phone;
+        
+        document.getElementById('car_register_no').value = c.car_register_no || '';
+        document.getElementById('car_province').value = c.car_province || '';
+        document.getElementById('car_brand').value = c.car_brand || '';
+        document.getElementById('car_model').value = c.car_model || '';
+        document.getElementById('car_frame_no').value = c.car_frame_no || '';
+        document.getElementById('car_color').value = c.car_color || '';
+        document.getElementById('car_mileage').value = c.car_mileage || 0;
+        
+        resultDiv.classList.add('hidden');
+        searchInput.value = ''; // Clear search
+    }
+
+    // --- Save Logic ---
+    saveBtn.addEventListener('click', function() {
+        const data = {
+            id: document.getElementById('cust_id').value,
+            name: document.getElementById('cust_name').value,
+            phone: document.getElementById('cust_phone').value,
+            car_register_no: document.getElementById('car_register_no').value,
+            car_province: document.getElementById('car_province').value,
+            car_brand: document.getElementById('car_brand').value,
+            car_model: document.getElementById('car_model').value,
+            car_frame_no: document.getElementById('car_frame_no').value,
+            car_color: document.getElementById('car_color').value,
+            car_mileage: document.getElementById('car_mileage').value
+        };
+
+        if (!data.name) {
+            alert('ກະລຸນາປ້ອນຊື່ລູກຄ້າ');
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ພວມບັນທຶກ...';
+
+        fetch('/api/save-customer/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                alert('ບັນທຶກຂໍ້ມູນສຳເລັດ!');
+                window.location.href = '/';
+            } else {
+                alert('ເກີດຂໍ້ຜິດພາດ: ' + res.error);
+            }
+        })
+        .catch(err => alert('Error: ' + err))
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save group-hover:scale-110 transition-transform"></i> <span>ບັນທຶກຂໍ້ມູນ / Save Customer</span>';
+        });
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !resultDiv.contains(e.target)) {
+            resultDiv.classList.add('hidden');
+        }
+    });
+
+</script>
+{% endblock %}

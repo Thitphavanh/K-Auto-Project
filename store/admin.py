@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Transaction, Brand  # <--- import Brand ເພີ່ມ
+from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer
 
 
 @admin.register(Brand)
@@ -42,3 +42,28 @@ class TransactionAdmin(admin.ModelAdmin):
     # ຫ້າມແກ້ໄຂປະຫວັດ (ເພື່ອຄວາມໂປ່ງໃສ) - Optional
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(CurrencyRate)
+class CurrencyRateAdmin(admin.ModelAdmin):
+    list_display = ("currency_code", "name", "rate_to_thb", "symbol")
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ("invoice_no", "customer_name", "net_amount_thb", "created_at")
+    inlines = [OrderItemInline]
+    search_fields = ("invoice_no", "customer_name")
+    list_filter = ("created_at",)
+
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "phone", "car_brand", "car_model", "car_register_no")
+    search_fields = ("code", "name", "phone", "car_register_no")
+    list_filter = ("car_brand", "created_at")

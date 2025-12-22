@@ -71,7 +71,7 @@
             <div>
                 <p class="stat-title" data-translate="daily_sales">ຍອດຂາຍວັນນີ້</p>
                 <p class="stat-value text-green-600">{{ daily_sales|floatformat:0|default:0 }}</p>
-                <p class="text-sm text-gray-500">ກີບ</p>
+                <p class="text-sm text-gray-500">ບາດ</p>
             </div>
             <div class="text-green-600">
                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +176,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'ຍອດຂາຍ (ກີບ)',
+                    label: 'ຍອດຂາຍ (ບາດ)',
                     data: data,
                     backgroundColor: 'rgba(59, 130, 246, 0.5)',
                     borderColor: 'rgb(59, 130, 246)',
@@ -191,7 +191,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString() + ' ກີບ';
+                                return value.toLocaleString() + ' ບາດ';
                             }
                         }
                     }

@@ -1,10 +1,12 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Product, Transaction, Brand
+from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer
+from django.db import transaction as db_transaction
+from decimal import Decimal
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import (
     login_required,
     user_passes_test,
 )  # <--- import ເພີ່ມ
+from django.contrib import messages  # Import messages for notifications
 from django.db.models import Sum, Count, Q  # <--- ໃຊ້ລວມຜົນ ແລະ ນັບຈຳນວນ
 from django.utils import timezone
 from datetime import timedelta
@@ -263,47 +265,193 @@ def api_get_product(request):
 
 
 # --- 2. API ສຳລັບບັນທຶກການຂາຍ (Checkout) ---
+
 @login_required
-@csrf_exempt  # ຖ້າຂີ້ຄ້ານສົ່ງ CSRF token ໃນ Header ໃຫ້ໃສ່ໂຕນີ້ (ແຕ່ແນະນຳໃຫ້ສົ່ງດີກວ່າ)
+def api_search_customer(request):
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return JsonResponse({"results": []})
+        
+    customers = Customer.objects.filter(
+        Q(name__icontains=query) | Q(phone__icontains=query) | Q(code__icontains=query)
+    )[:10]  # Limit to 10 results
+    
+    results = []
+    for c in customers:
+        results.append({
+            "id": c.id,
+            "code": c.code,
+            "name": c.name,
+            "phone": c.phone,
+            "car_register_no": c.car_register_no,
+            "car_province": c.car_province,
+            "car_brand": c.car_brand,
+            "car_model": c.car_model,
+            "car_frame_no": c.car_frame_no,
+            "car_color": c.car_color,
+            "car_mileage": c.car_mileage,
+            "display": f"{c.name} - {c.phone}"
+        })
+        
+    return JsonResponse({"results": results})
+
+
+@login_required
+def api_search_product(request):
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return JsonResponse({"results": []})
+        
+    products = Product.objects.filter(
+        Q(name__icontains=query) | Q(barcode__icontains=query)
+    )[:10]
+    
+    results = []
+    for p in products:
+        results.append({
+            "id": p.id,
+            "name": p.name,
+            "barcode": p.barcode,
+            "price": float(p.sell_price),
+            "unit": "ອັນ", # Default
+        })
+        
+    return JsonResponse({"results": results})
+
+
+@login_required
+@csrf_exempt
 def api_checkout(request):
     if request.method == "POST":
         try:
-            # ແກະຂໍ້ມູນ JSON ທີ່ສົ່ງມາຈາກ JavaScript
             data = json.loads(request.body)
             cart_items = data.get("items", [])
-
+            customer_info = data.get("customer", {})
+            car_info = data.get("car", {})
+            mechanic_info = data.get("mechanic", {})
+            
             if not cart_items:
                 return JsonResponse({"success": False, "error": "ກະຕ່າສິນຄ້າວ່າງເປົ່າ"})
 
-            # ເລີ່ມການຕັດສະຕັອກ
-            for item in cart_items:
-                product = Product.objects.get(id=item["id"])
-                qty = int(item["qty"])
+            with db_transaction.atomic():
+                # 1. Handle Customer (Find or Create/Update)
+                customer = None
+                cust_name = customer_info.get('name')
+                cust_phone = customer_info.get('phone')
+                cust_code = customer_info.get('code') # If exists
+                
+                if cust_name:
+                    # Logic to find/update
+                    defaults = {
+                        "phone": cust_phone,
+                        "car_register_no": car_info.get('register_no'),
+                        "car_province": car_info.get('province'),
+                        "car_brand": car_info.get('brand'),
+                        "car_model": car_info.get('model'),
+                        "car_frame_no": car_info.get('frame_no'),
+                        "car_color": car_info.get('color'),
+                    }
+                    
+                    if cust_code:
+                         customer, created = Customer.objects.update_or_create(
+                            code=cust_code,
+                            defaults=defaults
+                        )
+                         # Also update name if changed? Maybe keep name synced.
+                         customer.name = cust_name
+                         customer.save()
+                    else:
+                        customer, created = Customer.objects.update_or_create(
+                            name=cust_name,
+                            defaults=defaults
+                        )
 
-                if product.quantity >= qty:
-                    # 1. ຕັດສະຕັອກ
-                    product.quantity -= qty
-                    product.save()
+                # 2. ດຶງອັດຕາແລກປ່ຽນ
+                rates = {r.currency_code: r for r in CurrencyRate.objects.all()}
+                rate_lak = rates.get('LAK').rate_to_thb if 'LAK' in rates else Decimal('1')
+                rate_usd = rates.get('USD').rate_to_thb if 'USD' in rates else Decimal('1')
 
-                    # 2. ບັນທຶກລົງ Transaction
-                    Transaction.objects.create(
-                        product=product,
-                        user=request.user,
-                        transaction_type="OUT",  # ປະເພດຂາຍອອກ
-                        amount=qty,
-                        total_value=product.sell_price * qty,
-                    )
-                else:
-                    return JsonResponse(
-                        {"success": False, "error": f"ສິນຄ້າ {product.name} ໝົດ ຫຼື ບໍ່ພໍຂາຍ!"}
-                    )
+                # 3. ສ້າງ Order
+                order = Order.objects.create(
+                    customer=customer,
+                    customer_name=cust_name, # Snapshot
+                    customer_phone=cust_phone,
+                    customer_code=cust_code,
+                    car_register_no=car_info.get('register_no'),
+                    car_province=car_info.get('province'),
+                    car_brand=car_info.get('brand'),
+                    car_model=car_info.get('model'),
+                    car_frame_no=car_info.get('frame_no'),
+                    car_mileage=car_info.get('mileage'),
+                    car_color=car_info.get('color'),
+                    mechanic_name=mechanic_info.get('mechanic'),
+                    sale_representative=mechanic_info.get('sale_rep'),
+                    rate_lak=rate_lak,
+                    rate_usd=rate_usd,
+                    payment_cash=True, # POS default to cash for now
+                    user=request.user
+                )
 
-            return JsonResponse({"success": True})
+                for item in cart_items:
+                    product = Product.objects.get(id=item["id"])
+                    qty = int(item["qty"])
+                    price = product.sell_price
+                    discount_percent = item.get("discount", 0)
+                    
+                    if product.quantity >= qty:
+                        # ຕັດສະຕັອກ
+                        product.quantity -= qty
+                        product.save()
+
+                        # ຄິດໄລ່ສ່ວນຫຼຸດ ແລະ ຍອດລວມ
+                        line_total = price * qty
+                        discount_amount = (line_total * discount_percent) / 100
+                        final_line_total = line_total - discount_amount
+                        
+                        # ບັນທຶກ OrderItem
+                        OrderItem.objects.create(
+                            order=order,
+                            product=product,
+                            description=product.name,
+                            quantity=qty,
+                            unit="ອັນ", # Default for products
+                            unit_price=price,
+                            discount_percent=discount_percent,
+                            discount_amount=discount_amount,
+                            amount=final_line_total
+                        )
+
+                        # ບັນທຶກລົງ Transaction (Legacy compatibility)
+                        Transaction.objects.create(
+                            product=product,
+                            user=request.user,
+                            transaction_type="OUT",
+                            amount=qty,
+                            total_value=final_line_total,
+                        )
+                    else:
+                        raise Exception(f"ສິນຄ້າ {product.name} ໝົດ ຫຼື ບໍ່ພໍຂາຍ!")
+
+                # Final Calculations via model method
+                order.payment_amount_cash = order.net_amount_thb # POS usually full cash
+                order.calculate_totals()
+
+            return JsonResponse({
+                "success": True, 
+                "order_id": order.id,
+                "invoice_no": order.invoice_no
+            })
 
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "Invalid Method"})
+
+
+@login_required
+def bill_detail_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, "store/bill-detail.html", {"order": order})
 
 
 # --- 3. API ສຳລັບຮັບສິນຄ້າເຂົ້າ (Stock-In) แບບ Realtime ---
@@ -377,3 +525,504 @@ def api_stock_in(request):
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "Invalid Method"})
+
+
+
+
+@login_required
+@csrf_exempt
+def api_manual_checkout(request):
+    """
+    Handle Manual Bill Creation (Free-text items)
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            items = data.get("items", [])
+            customer_info = data.get("customer", {})
+            car_info = data.get("car", {})
+            mechanic_info = data.get("mechanic", {})
+            payment_info = data.get("payment", {})
+            tax_percent = float(data.get("tax_percent", 0))
+
+            with db_transaction.atomic():
+                # 1. Handle Customer
+                customer = None
+                cust_name = customer_info.get('name')
+                cust_phone = customer_info.get('phone')
+                cust_code = customer_info.get('code')
+
+                if cust_name:
+                    defaults = {
+                        "phone": cust_phone,
+                        "car_register_no": car_info.get('register_no'),
+                        "car_province": car_info.get('province'),
+                        "car_brand": car_info.get('brand'),
+                        "car_model": car_info.get('model'),
+                        "car_frame_no": car_info.get('frame'),
+                        "car_color": car_info.get('color'),
+                    }
+                    if cust_code:
+                        customer, created = Customer.objects.update_or_create(code=cust_code, defaults=defaults)
+                        if customer.name != cust_name:
+                             customer.name = cust_name
+                             customer.save()
+                    else:
+                        customer, created = Customer.objects.update_or_create(name=cust_name, defaults=defaults)
+
+                # 2. Rates
+                rates = {r.currency_code: r for r in CurrencyRate.objects.all()}
+                rate_lak_val = rates.get('LAK').rate_to_thb if 'LAK' in rates else Decimal('1')
+                rate_usd_val = rates.get('USD').rate_to_thb if 'USD' in rates else Decimal('1')
+
+                # 3. Create Order
+                order = Order.objects.create(
+                    customer=customer,
+                    customer_name=cust_name,
+                    customer_phone=cust_phone,
+                    customer_code=cust_code,
+                    car_register_no=car_info.get('register_no'),
+                    car_province=car_info.get('province'),
+                    car_brand=car_info.get('brand'),
+                    car_model=car_info.get('model'),
+                    car_frame_no=car_info.get('frame'),
+                    car_mileage=car_info.get('mileage'),
+                    car_color=car_info.get('color'),
+                    mechanic_name=mechanic_info.get('name'),
+                    sale_representative=mechanic_info.get('rep'),
+                    
+                    # Payment Info
+                    received_by=payment_info.get('received_by'),
+                    check_no=payment_info.get('check_no'),
+                    check_date=payment_info.get('check_date') if payment_info.get('check_date') else None,
+                    bank_name=payment_info.get('bank_name'),
+                    bank_branch=payment_info.get('bank_branch'),
+                    payment_amount_cash=Decimal(str(payment_info.get('amount_cash', 0))),
+                    payment_amount_check=Decimal(str(payment_info.get('amount_check', 0))),
+                    payment_amount_credit=Decimal(str(payment_info.get('amount_credit', 0))),
+
+                    # Booleans based on amounts
+                    payment_cash=Decimal(str(payment_info.get('amount_cash', 0))) > 0,
+                    payment_check=Decimal(str(payment_info.get('amount_check', 0))) > 0,
+                    payment_credit=Decimal(str(payment_info.get('amount_credit', 0))) > 0,
+
+                    tax_percent=Decimal(str(tax_percent)),
+                    rate_lak=rate_lak_val,
+                    rate_usd=rate_usd_val,
+                    user=request.user
+                )
+
+                for item in items:
+                    qty = Decimal(str(item.get('qty', 1)))
+                    price = Decimal(str(item.get('price', 0)))
+                    discount_amount = Decimal(str(item.get('discount', 0)))
+                    desc = item.get('desc', 'Item')
+                    ref_code = item.get('ref_code', '')
+
+                    OrderItem.objects.create(
+                        order=order,
+                        product=None, # Manual item
+                        ref_code=ref_code,
+                        description=desc,
+                        quantity=qty,
+                        unit=item.get('unit', 'ອັນ'),
+                        unit_price=price,
+                        discount_percent=discount_amount  # Named discount in JSON but contains %
+                    )
+
+                # Final Calculations via model method
+                order.calculate_totals()
+
+            return JsonResponse({"success": True, "order_id": order.id, "invoice_no": order.invoice_no})
+        
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+            
+    return JsonResponse({"success": False, "error": "Invalid Method"})
+
+
+@login_required
+def input_bill_view(request):
+    try:
+        rates = {r.currency_code: r for r in CurrencyRate.objects.all()}
+        rate_lak_obj = rates.get('LAK')
+        rate_usd_obj = rates.get('USD')
+
+        rate_lak = float(rate_lak_obj.rate_to_thb) if rate_lak_obj else 0.0
+        rate_usd = float(rate_usd_obj.rate_to_thb) if rate_usd_obj else 1.0
+    except Exception:
+        # Fallback to default rates if there's any error
+        rate_lak = 0.0
+        rate_usd = 1.0
+
+    context = {
+        'rate_lak': rate_lak,
+        'rate_usd': rate_usd
+    }
+    return render(request, "store/input_customer_bill.html", context)
+
+@login_required
+def customer_registration_view(request):
+    """Standalone page for Customer & Vehicle Registration"""
+    return render(request, "store/customer_registration.html")
+
+@csrf_exempt
+@login_required
+def api_save_customer(request):
+    """API to Save/Update Customer & Vehicle details independently"""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"})
+    
+    try:
+        data = json.loads(request.body)
+        cust_id = data.get("id")
+        
+        # 1. Handle Customer Record
+        if cust_id:
+            customer = get_object_or_404(Customer, id=cust_id)
+        else:
+            customer = Customer()
+        
+        customer.name = data.get("name")
+        customer.phone = data.get("phone")
+        
+        # Update/Set Vehicle Info
+        customer.car_register_no = data.get("car_register_no")
+        customer.car_province = data.get("car_province")
+        customer.car_brand = data.get("car_brand")
+        customer.car_model = data.get("car_model")
+        customer.car_frame_no = data.get("car_frame_no")
+        customer.car_color = data.get("car_color")
+        customer.car_mileage = data.get("car_mileage") or 0
+        
+        customer.save()
+        
+        return JsonResponse({
+            "success": True, 
+            "customer": {
+                "id": customer.id,
+                "code": customer.code,
+                "name": customer.name,
+                "phone": customer.phone,
+                "car_register_no": customer.car_register_no,
+                "car_brand": customer.car_brand,
+                "car_model": customer.car_model,
+                "car_mileage": customer.car_mileage
+            }
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+def order_list(request):
+    """ສະແດງລາຍການບິນທັງໝົດ"""
+    orders = Order.objects.all().order_by('-date', '-invoice_no')
+    
+    # ຄົ້ນຫາ
+    search_query = request.GET.get('search', '')
+    if search_query:
+        orders = orders.filter(
+            Q(invoice_no__icontains=search_query) |
+            Q(customer_name__icontains=search_query) |
+            Q(customer_code__icontains=search_query) |
+            Q(car_register_no__icontains=search_query)
+        )
+    
+    # ກັ່ນຕອງຕາມວັນທີ
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    if date_from:
+        orders = orders.filter(date__gte=date_from)
+    if date_to:
+        orders = orders.filter(date__lte=date_to)
+    
+    context = {
+        'orders': orders,
+        'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    
+    return render(request, 'orders/order_list.html', context)
+
+
+def order_detail(request, invoice_no):
+    """ສະແດງລາຍລະອຽດບິນ (ແບບພິມໄດ້)"""
+    order = get_object_or_404(Order, invoice_no=invoice_no)
+    items = order.items.all().order_by('item_no')
+    
+    context = {
+        'order': order,
+        'items': items,
+    }
+    
+    return render(request, 'orders/bill-detail.html', context)
+
+
+def order_create(request):
+    """ສ້າງບິນໃໝ່"""
+    if request.method == 'POST':
+        with db_transaction.atomic():
+            # ສ້າງບິນໃໝ່
+            order = Order(user=request.user)
+            
+            # ຂໍ້ມູນພື້ນຖານ
+            order_date = request.POST.get('date')
+            if order_date:
+                order.date = order_date
+            else:
+                order.date = timezone.now().date()
+            
+            # ຂໍ້ມູນລູກຄ້າ
+            order.customer_name = request.POST.get('customer_name', '')
+            order.customer_phone = request.POST.get('customer_phone', '')
+            order.customer_code = request.POST.get('customer_code', '')
+            
+            # ຂໍ້ມູນລົດ
+            order.car_register_no = request.POST.get('car_register_no', '')
+            order.car_province = request.POST.get('car_province', '')
+            order.car_brand = request.POST.get('car_brand', '')
+            order.car_model = request.POST.get('car_model', '')
+            order.car_frame_no = request.POST.get('car_frame_no', '')
+            order.car_color = request.POST.get('car_color', '')
+            order.car_mileage = request.POST.get('car_mileage', '')
+            
+            # ຂໍ້ມູນພະນັກງານ
+            order.mechanic_name = request.POST.get('mechanic_name', '')
+            order.sale_representative = request.POST.get('sale_representative', '')
+            
+            # ຂໍ້ມູນການຈ່າຍເງິນ
+            order.received_by = request.POST.get('received_by', '')
+            order.check_no = request.POST.get('check_no', '')
+            check_date = request.POST.get('check_date', '')
+            if check_date:
+                order.check_date = check_date
+            else:
+                order.check_date = None
+            order.bank_name = request.POST.get('bank_name', '')
+            order.bank_branch = request.POST.get('bank_branch', '')
+            
+            # ວິທີການຈ່າຍເງິນ
+            order.payment_cash = request.POST.get('payment_cash') == 'on'
+            order.payment_check = request.POST.get('payment_check') == 'on'
+            order.payment_credit = request.POST.get('payment_credit') == 'on'
+            
+            order.payment_amount_cash = Decimal(request.POST.get('payment_amount_cash', '0') or '0')
+            order.payment_amount_check = Decimal(request.POST.get('payment_amount_check', '0') or '0')
+            order.payment_amount_credit = Decimal(request.POST.get('payment_amount_credit', '0') or '0')
+            
+            # ອາກອນ
+            order.tax_percent = Decimal(request.POST.get('tax_percent', '0') or '0')
+            
+            # ບັນທຶກບິນ
+            order.save()
+            
+            # ເພີ່ມລາຍການສິນຄ້າ
+            item_count = int(request.POST.get('item_count', 0))
+            for i in range(1, item_count + 1):
+                description = request.POST.get(f'description_{i}', '').strip()
+                if description:
+                    item = OrderItem(order=order)
+                    item.item_no = i
+                    item.ref_code = request.POST.get(f'ref_code_{i}', '')
+                    item.description = description
+                    item.quantity = Decimal(request.POST.get(f'quantity_{i}', '1') or '1')
+                    item.unit = request.POST.get(f'unit_{i}', 'ອັນ')
+                    item.unit_price = Decimal(request.POST.get(f'unit_price_{i}', '0') or '0')
+                    item.discount_percent = Decimal(request.POST.get(f'discount_percent_{i}', '0') or '0')
+                    item.save()
+            
+            # ຄິດໄລ່ຍອດລວມທັງໝົດ
+            order.calculate_totals()
+            
+            messages.success(request, f'ສ້າງບິນເລກທີ {order.invoice_no} ສຳເລັດແລ້ວ')
+            return redirect('order_detail', invoice_no=order.invoice_no)
+    
+    # GET request
+    context = {
+        'today': timezone.now().date(),
+    }
+    return render(request, 'orders/order_form.html', context)
+
+
+def order_update(request, invoice_no):
+    """ແກ້ໄຂບິນ"""
+    order = get_object_or_404(Order, invoice_no=invoice_no)
+    
+    if request.method == 'POST':
+        with db_transaction.atomic():
+            # ອັບເດດຂໍ້ມູນພື້ນຖານ
+            order_date = request.POST.get('date')
+            if order_date:
+                order.date = order_date
+            
+            # ຂໍ້ມູນລູກຄ້າ
+            order.customer_name = request.POST.get('customer_name', '')
+            order.customer_phone = request.POST.get('customer_phone', '')
+            order.customer_code = request.POST.get('customer_code', '')
+            
+            # ຂໍ້ມູນລົດ
+            order.car_register_no = request.POST.get('car_register_no', '')
+            order.car_province = request.POST.get('car_province', '')
+            order.car_brand = request.POST.get('car_brand', '')
+            order.car_model = request.POST.get('car_model', '')
+            order.car_frame_no = request.POST.get('car_frame_no', '')
+            order.car_color = request.POST.get('car_color', '')
+            order.car_mileage = request.POST.get('car_mileage', '')
+            
+            # ຂໍ້ມູນພະນັກງານ
+            order.mechanic_name = request.POST.get('mechanic_name', '')
+            order.sale_representative = request.POST.get('sale_representative', '')
+            
+            # ຂໍ້ມູນການຈ່າຍເງິນ
+            order.received_by = request.POST.get('received_by', '')
+            order.check_no = request.POST.get('check_no', '')
+            check_date = request.POST.get('check_date', '')
+            if check_date:
+                order.check_date = check_date
+            else:
+                order.check_date = None
+            order.bank_name = request.POST.get('bank_name', '')
+            order.bank_branch = request.POST.get('bank_branch', '')
+            
+            # ວິທີການຈ່າຍເງິນ
+            order.payment_cash = request.POST.get('payment_cash') == 'on'
+            order.payment_check = request.POST.get('payment_check') == 'on'
+            order.payment_credit = request.POST.get('payment_credit') == 'on'
+            
+            order.payment_amount_cash = Decimal(request.POST.get('payment_amount_cash', '0') or '0')
+            order.payment_amount_check = Decimal(request.POST.get('payment_amount_check', '0') or '0')
+            order.payment_amount_credit = Decimal(request.POST.get('payment_amount_credit', '0') or '0')
+            
+            # ອາກອນ
+            order.tax_percent = Decimal(request.POST.get('tax_percent', '0') or '0')
+            
+            order.save()
+            
+            # ລຶບລາຍການເກົ່າທັງໝົດ ແລະ ເພີ່ມໃໝ່ (ຫຼືອັບເດດ)
+            order.items.all().delete()
+            
+            item_count = int(request.POST.get('item_count', 0))
+            for i in range(1, item_count + 1):
+                description = request.POST.get(f'description_{i}', '').strip()
+                if description:
+                    item = OrderItem(order=order)
+                    item.item_no = i
+                    item.ref_code = request.POST.get(f'ref_code_{i}', '')
+                    item.description = description
+                    item.quantity = Decimal(request.POST.get(f'quantity_{i}', '1') or '1')
+                    item.unit = request.POST.get(f'unit_{i}', 'ອັນ')
+                    item.unit_price = Decimal(request.POST.get(f'unit_price_{i}', '0') or '0')
+                    item.discount_percent = Decimal(request.POST.get(f'discount_percent_{i}', '0') or '0')
+                    item.save()
+            
+            # ຄິດໄລ່ຍອດລວມທັງໝົດ
+            order.calculate_totals()
+            
+            messages.success(request, f'ອັບເດດບິນເລກທີ {order.invoice_no} ສຳເລັດແລ້ວ')
+            return redirect('order_detail', invoice_no=order.invoice_no)
+    
+    # GET request
+    items = order.items.all().order_by('item_no')
+    context = {
+        'order': order,
+        'items': items,
+        'is_update': True,
+        'today': timezone.now().date(),
+    }
+    return render(request, 'orders/order_form.html', context)
+
+
+def order_delete(request, invoice_no):
+    """ລຶບບິນ"""
+    order = get_object_or_404(Order, invoice_no=invoice_no)
+    
+    if request.method == 'POST':
+        invoice_no_copy = order.invoice_no
+        order.delete()
+        messages.success(request, f'ລຶບບິນເລກທີ {invoice_no_copy} ສຳເລັດແລ້ວ')
+        return redirect('order_list')
+    
+    context = {
+        'order': order,
+    }
+    return render(request, 'orders/order_confirm_delete.html', context)
+
+
+def order_print(request, invoice_no):
+    """ພິມບິນ (ໃຊ້ template ທີ່ຖືກອອກແບບມາພິເສດສຳລັບການພິມ)"""
+    order = get_object_or_404(Order, invoice_no=invoice_no)
+    items = order.items.all().order_by('item_no')
+    
+    context = {
+        'order': order,
+        'items': items,
+    }
+    
+    return render(request, 'orders/bill-detail-print.html', context)
+
+
+def order_api_list(request):
+    """API: ດຶງລາຍການບິນທັງໝົດ (JSON)"""
+    orders = Order.objects.all().order_by('-date')
+    
+    data = []
+    for order in orders:
+        data.append({
+            'invoice_no': order.invoice_no,
+            'date': order.date.strftime('%Y-%m-%d'),
+            'customer_name': order.customer_name,
+            'customer_code': order.customer_code,
+            'car_register_no': order.car_register_no,
+            'net_amount_thb': float(order.net_amount_thb),
+            'net_amount_lak': float(order.net_amount_lak),
+            'net_amount_usd': float(order.net_amount_usd),
+        })
+    
+    return JsonResponse({'orders': data})
+
+
+def order_api_detail(request, invoice_no):
+    """API: ດຶງລາຍລະອຽດບິນ (JSON)"""
+    order = get_object_or_404(Order, invoice_no=invoice_no)
+    items = order.items.all().order_by('item_no')
+    
+    items_data = []
+    for item in items:
+        items_data.append({
+            'item_no': item.item_no,
+            'ref_code': item.ref_code,
+            'description': item.description,
+            'quantity': float(item.quantity),
+            'unit': item.unit,
+            'unit_price': float(item.unit_price),
+            'discount_percent': float(item.discount_percent),
+            'discount_amount': float(item.discount_amount),
+            'amount': float(item.amount),
+        })
+    
+    data = {
+        'invoice_no': order.invoice_no,
+        'date': order.date.strftime('%Y-%m-%d'),
+        'customer_name': order.customer_name,
+        'customer_phone': order.customer_phone,
+        'customer_code': order.customer_code,
+        'car_register_no': order.car_register_no,
+        'car_province': order.car_province,
+        'car_brand': order.car_brand,
+        'car_model': order.car_model,
+        'car_frame_no': order.car_frame_no,
+        'car_color': order.car_color,
+        'car_mileage': order.car_mileage,
+        'mechanic_name': order.mechanic_name,
+        'sale_representative': order.sale_representative,
+        'subtotal_thb': float(order.subtotal_thb),
+        'discount_thb': float(order.discount_thb),
+        'tax_percent': float(order.tax_percent),
+        'tax_amount_thb': float(order.tax_amount_thb),
+        'net_amount_thb': float(order.net_amount_thb),
+        'net_amount_lak': float(order.net_amount_lak),
+        'net_amount_usd': float(order.net_amount_usd),
+        'items': items_data,
+    }
+    
+    return JsonResponse(data)

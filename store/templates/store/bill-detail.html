@@ -1,0 +1,504 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ໃບບິນ - {{ order.invoice_no }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Lao', Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header Section */
+        .header {
+            border: 3px solid #000;
+            padding: 15px;
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            border: 4px solid #ffcc00;
+            border-radius: 15px;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .logo-k {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .logo-subtitle {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .company-info {
+            flex: 1;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .company-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
+        }
+
+        .invoice-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        /* Info Tables */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .info-table td {
+            border: 2px solid #000;
+            padding: 8px;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .info-table .label {
+            background: #fff;
+            font-weight: bold;
+            width: 15%;
+            white-space: nowrap;
+        }
+
+        .info-table .value {
+            background: #fff;
+        }
+
+        /* Customer Code Table */
+        .code-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .code-table td {
+            border: 2px solid #000;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .code-table .label {
+            background: #fff;
+            font-weight: bold;
+            width: 15%;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 2px solid #000;
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .items-table th {
+            background: #fff;
+            font-weight: bold;
+        }
+
+        .items-table .desc-col {
+            text-align: left;
+        }
+
+        /* Totals Section */
+        .totals-row td {
+            font-weight: bold;
+            background: #f8f8f8;
+        }
+
+        /* Payment Table */
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+        }
+
+        .payment-table th,
+        .payment-table td {
+            border: 2px solid #000;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .payment-table th {
+            background: #fff;
+            font-weight: bold;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+        }
+
+        .signature-section td {
+            border: 2px solid #000;
+            padding: 50px 10px 10px 10px;
+            text-align: center;
+            font-size: 13px;
+            width: 33.33%;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .page {
+                box-shadow: none;
+                padding: 20px;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+
+        .btn-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .btn-print:hover {
+            background: #218838;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="btn-print no-print" onclick="window.print()">🖨️ ພິມບິນ</button>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-text">ເຄອໍໂຕ້ລາວວເຊີວິຊ</div>
+                    <div class="logo-k">K</div>
+                    <div class="logo-subtitle">AUTO LAO<br>SERVICE</div>
+                </div>
+                <div class="company-info">
+                    <div class="company-name">ວິສາຫະກິດສ່ວນບຸກຄົນອູ່ສ້ອມແປງລົດ ເຄອໍໂຕ້ລາວ ເຊີວິຊ</div>
+                    <div>ບ້ານນາເລົ່າ ເມືອງໄກສອນພົມວິຫານ ແຂວງສະຫວັນນະເຂດ</div>
+                    <div>ໂທລະສັບ: + 856 20 96966610 /+ 856 20 96964449 ອີເມວ: kautolao@hotmail.com</div>
+                </div>
+            </div>
+            <div class="invoice-info">
+                <strong>ເລກທີ :<br>No.</strong><br>
+                {{ order.invoice_no }}
+            </div>
+        </div>
+
+        <!-- Customer Info Table -->
+        <table class="info-table">
+            <tr>
+                <td class="label" rowspan="2">ລູກຄ້າ :<br>Customer</td>
+                <td class="value" rowspan="2">
+                    {{ order.customer_name|default:"-" }}<br>
+                    {% if order.customer_phone %}<small>ເບີໂທ: {{ order.customer_phone }}</small>{% endif %}
+                </td>
+                <td class="label">ເລກ km<br>Mile No.</td>
+                <td class="value">{{ order.car_mileage|default:"-" }}</td>
+                <td class="label" rowspan="2">ວັນທີ :<br>Date</td>
+                <td class="value" rowspan="2">{{ order.date|date:"d-M-y" }}</td>
+            </tr>
+            <tr>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td class="label">ທະບຽນລົດ<br>Car Register No</td>
+                <td class="value">
+                    {{ order.car_register_no|default:"-" }} 
+                    {% if order.car_province %}{{ order.car_province }}{% endif %}<br>Province
+                </td>
+                <td class="label">ເລກໂມເດລ<br>Model :</td>
+                <td class="value">{{ order.car_model|default:"-" }}</td>
+                <td class="label">ເລກຕົວຖັງ<br>Frame No</td>
+                <td class="value">{{ order.car_frame_no|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="label">ຢີຫໍ້ລົດ :<br>Brand :</td>
+                <td class="value">{{ order.car_brand|default:"-" }}</td>
+                <td colspan="2"></td>
+                <td class="label">ສີລົດ :<br>Colour:</td>
+                <td class="value">{{ order.car_color|default:"-" }}</td>
+            </tr>
+        </table>
+
+        <!-- Customer Code Table -->
+        <table class="code-table">
+            <tr>
+                <td class="label">ລະຫັດລູກຄ້າ<br>Customer Code</td>
+                <td>{{ order.customer_code|default:"-" }}</td>
+                <td class="label">ຊ່າງສ້ອມ<br>MECHANIC</td>
+                <td>{{ order.mechanic_name|default:"-" }}</td>
+                <td class="label" colspan="2">ພະນັກງານຂາຍ :<br>Sale Representative</td>
+                <td>{{ order.sale_representative|default:"-" }}</td>
+            </tr>
+        </table>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th width="50">ລຳດັບ<br>Item</th>
+                    <th width="100">ລະຫັດສິນຄ້າ<br>Ref. Code</th>
+                    <th>ລາຍການ<br>Description</th>
+                    <th width="80">ຈຳນວນ<br>Quantity</th>
+                    <th width="60">ໜ່ວຍ<br>Unit</th>
+                    <th width="100">ລາຄາ<br>Unit Price</th>
+                    <th width="100">ສ່ວນຫຼຸດ<br>Discount</th>
+                    <th width="100">ຈຳນວນເງິນ<br>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.ref_code|default:"-" }}</td>
+                    <td class="desc-col">{{ item.description }}</td>
+                    <td>{{ item.quantity|floatformat:2 }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td class="text-right">{{ item.unit_price|floatformat:2|intcomma }}</td>
+                    <td>{{ item.discount_percent|floatformat:0 }}%</td>
+                    <td class="text-right">{{ item.amount|floatformat:2|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td>1</td>
+                    <td>-</td>
+                    <td class="desc-col">-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>0%</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td></td>
+                    <td class="desc-col"></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>0%</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td></td>
+                    <td class="desc-col"></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>0%</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td></td>
+                    <td class="desc-col"></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>0%</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td></td>
+                    <td class="desc-col"></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>0%</td>
+                    <td>-</td>
+                </tr>
+                {% endfor %}
+                <tr class="totals-row">
+                    <td colspan="5" style="text-align: right; font-weight: bold;">ລວມຍອດສ່ວນຫຼຸດ</td>
+                    <td style="font-weight: bold;">₭</td>
+                    <td style="font-weight: bold;">{{ order.discount_lak|floatformat:2|intcomma }}</td>
+                    <td style="font-weight: bold;">฿</td>
+                </tr>
+                <tr>
+                    <td colspan="2" rowspan="2" style="text-align: left; font-weight: bold;">ໝາຍເຫດ :</td>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">ລວມເງິນ/Total</td>
+                    <td style="font-weight: bold;">₭</td>
+                    <td style="text-align: right;">{{ order.subtotal_lak|floatformat:0|intcomma }}</td>
+                    <td style="font-weight: bold;">฿</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">ອາກອນ/Tax</td>
+                    <td>{{ order.tax_percent|floatformat:0 }}%</td>
+                    <td style="text-align: right;">{{ order.tax_amount_lak|floatformat:0|intcomma }}</td>
+                    <td style="text-align: right;">{{ order.tax_amount_thb|floatformat:2|intcomma }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" rowspan="2" style="text-align: left; font-weight: bold;">ຕົວອັກສອນ</td>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">ລວມສຸດທິ/Net Amount:</td>
+                    <td style="font-weight: bold;">₭</td>
+                    <td style="text-align: right;">{{ order.net_amount_lak|floatformat:0|intcomma }}</td>
+                    <td style="font-weight: bold;">฿</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">{{ order.net_amount_thb|floatformat:2|intcomma }}</td>
+                    <td style="font-weight: bold;">$</td>
+                    <td colspan="2" style="text-align: left;">{{ order.net_amount_usd|floatformat:2|intcomma }}</td>
+                    <td style="text-align: right;">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Payment Section -->
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>ຮັບເງິນໂດຍ<br>Received By</th>
+                    <th>ເລກທີເຊັກ<br>Check No.</th>
+                    <th>ວັນທີໃນເຊັກ<br>Check Date</th>
+                    <th>ທະນາຄານ<br>Bank</th>
+                    <th>ສາຂາ<br>Branch</th>
+                    <th>ຈຳນວນເງິນ<br>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="3">
+                        <div style="margin: 5px 0;">
+                            <input type="checkbox" {% if order.payment_cash %}checked{% endif %}> ເງິນສົດ<br>
+                            <input type="checkbox" {% if order.payment_check %}checked{% endif %}> ໃຊ້ບັດທະນາຄານ
+                        </div>
+                        <div style="margin: 5px 0;">
+                            <input type="checkbox" {% if order.payment_credit %}checked{% endif %}> ບໍ່ຕີດໜີ້
+                        </div>
+                    </td>
+                    <td rowspan="3">{{ order.check_no|default:"" }}</td>
+                    <td rowspan="3">{% if order.check_date %}{{ order.check_date|date:"d-M-y" }}{% endif %}</td>
+                    <td rowspan="3">{{ order.bank_name|default:"" }}</td>
+                    <td rowspan="3">{{ order.bank_branch|default:"" }}</td>
+                    <td rowspan="3">
+                        {% if order.payment_amount_cash > 0 %}
+                            ฿{{ order.payment_amount_cash|floatformat:2|intcomma }}
+                        {% elif order.payment_amount_check > 0 %}
+                            ฿{{ order.payment_amount_check|floatformat:2|intcomma }}
+                        {% elif order.payment_amount_credit > 0 %}
+                            ฿{{ order.payment_amount_credit|floatformat:2|intcomma }}
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Signature Section -->
+        <table class="signature-section">
+            <tr>
+                <td>
+                    <div style="margin-bottom: 10px;">ລາຍເຊັນ</div>
+                    <div style="font-weight: bold;">ຜູ້ຮັບເງິນ / Received By</div>
+                    <div style="margin-top: 60px;">
+                        ວັນທີ / Date: {% if order.received_by_date %}{{ order.received_by_date|date:"d/m/Y" }}{% else %}____/____/____{% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div style="margin-bottom: 10px;">ລາຍເຊັນ</div>
+                    <div style="font-weight: bold;">ຜູ້ຈ່າຍເງິນ / Paid By</div>
+                    <div style="margin-top: 60px;">
+                        ວັນທີ / Date: {% if order.paid_by_date %}{{ order.paid_by_date|date:"d/m/Y" }}{% else %}____/____/____{% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div style="margin-bottom: 10px;">ລາຍເຊັນ</div>
+                    <div style="font-weight: bold;">ຜູ້ຮັບສິນຄ້າ / Good Received By</div>
+                    <div style="margin-top: 60px;">
+                        ວັນທີ / Date: {% if order.good_received_by_date %}{{ order.good_received_by_date|date:"d/m/Y" }}{% else %}____/____/____{% endif %}
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="footer">
+            <p>{% now "d/m/Y" %}<span style="float: right;">Page 1 of 1</span></p>
+        </div>
+    </div>
+
+</body>
+</html>

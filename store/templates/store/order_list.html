@@ -1,0 +1,247 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ລາຍການບິນທັງໝົດ - K-Auto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #d00;
+            --dark-red: #900;
+            --light-gray: #f4f4f4;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Noto Sans Lao', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--primary-red);
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary-red);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary-red); color: white; }
+        .btn-primary:hover { background: var(--dark-red); }
+
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+
+        /* Search & Filter Form */
+        .filter-section {
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .form-control {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .order-table th, .order-table td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-table th {
+            background: #eee;
+            font-weight: bold;
+            color: #555;
+            position: sticky;
+            top: 0;
+        }
+
+        .order-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .amount-thb { color: var(--primary-red); font-weight: bold; }
+        .amount-lak { color: #555; }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-icon {
+            color: #555;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .action-icon:hover { color: var(--primary-red); }
+
+        @media screen and (max-width: 768px) {
+            .container { padding: 15px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .header .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="{% url 'home' %}" style="color: var(--primary-red); font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+                <h1><i class="fas fa-file-invoice-dollar"></i> ລາຍການບິນທັງໝົດ</h1>
+            </div>
+            <div class="actions">
+                <a href="{% url 'input-bill' %}" class="btn btn-primary"><i class="fas fa-plus"></i> ສ້າງບິນ (Manual)</a>
+                <a href="{% url 'pos' %}" class="btn btn-success"><i class="fas fa-cash-register"></i> ໜ້າ POS</a>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="GET" class="filter-form">
+                <div class="form-group" style="flex: 2;">
+                    <label>ຄົ້ນຫາ (ເລກບິນ, ລູກຄ້າ, ທະບຽນ...)</label>
+                    <input type="text" name="search" class="form-control" value="{{ search_query }}" placeholder="ຄົ້ນຫາ...">
+                </div>
+                <div class="form-group">
+                    <label>ເລີ່ມວັນທີ</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                </div>
+                <div class="form-group">
+                    <label>ຫາວັນທີ</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> ກັ່ນຕອງ</button>
+                    <a href="{% url 'order_list' %}" class="btn" style="background: #ccc; color: #333;">ຣີເຊັດ</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-responsive">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>ວັນທີ</th>
+                        <th>ເລກທີບິນ</th>
+                        <th>ຊື່ລູກຄ້າ</th>
+                        <th>ທະບຽນລົດ</th>
+                        <th class="text-right">ຍອດລວມ (฿)</th>
+                        <th class="text-right">ຍອດລວມ (₭)</th>
+                        <th>ເຄື່ອງມື</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.date | date:"d/m/Y" }}</td>
+                        <td><strong>{{ order.invoice_no }}</strong></td>
+                        <td>{{ order.customer_name|default:"-" }}</td>
+                        <td>{{ order.car_register_no|default:"-" }}</td>
+                        <td class="text-right amount-thb">{{ order.net_amount_thb|floatformat:2|intcomma }} ฿</td>
+                        <td class="text-right amount-lak">{{ order.net_amount_lak|floatformat:0|intcomma }} ₭</td>
+                        <td>
+                            <div class="actions">
+                                <a href="{% url 'order_detail' order.invoice_no %}" class="action-icon" title="ເບິ່ງລາຍລະອຽດ"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'order_update' order.invoice_no %}" class="action-icon" title="ແກ້ໄຂ"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'order_print' order.invoice_no %}" class="action-icon" title="ພິມ"><i class="fas fa-print"></i></a>
+                                <a href="{% url 'order_delete' order.invoice_no %}" class="action-icon" title="ລຶບ" style="color: #dc3545;"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-folder-open" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                            ບໍ່ພົບລາຍການບິນ
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
