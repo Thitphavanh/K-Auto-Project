@@ -81,11 +81,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 # Django Channels Configuration
+# Default host varies based on whether we are in Docker or on the host
+DEFAULT_REDIS_HOST = "redis" if os.path.exists('/.dockerenv') else "127.0.0.1"
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(os.environ.get("REDIS_HOST", "redis"), 6379)],
+            "hosts": [(os.environ.get("REDIS_HOST", DEFAULT_REDIS_HOST), 6379)],
         },
     },
 }
@@ -104,14 +107,22 @@ if USE_SQLITE:
         }
     }
 else:
+    # Detect if running inside Docker
+    IS_DOCKER = os.path.exists('/.dockerenv')
+    
+    # Default host/port varies based on whether we are in Docker or on the host
+    # Host needs 54320 (mapped port), Docker needs 'db' and 5432 (internal service)
+    DEFAULT_DB_HOST = "db" if IS_DOCKER else "127.0.0.1"
+    DEFAULT_DB_PORT = "5432" if IS_DOCKER else "54320"
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ.get("DB_NAME", "kauto_db"),
             "USER": os.environ.get("DB_USER", "postgres"),
             "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
-            "HOST": os.environ.get("DB_HOST", "localhost"),
-            "PORT": os.environ.get("DB_PORT", "5432"),
+            "HOST": os.environ.get("DB_HOST", DEFAULT_DB_HOST),
+            "PORT": os.environ.get("DB_PORT", DEFAULT_DB_PORT),
         }
     }
 
@@ -120,7 +131,7 @@ else:
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{os.environ.get('REDIS_HOST', 'redis')}:6379/1",
+        "LOCATION": f"redis://{os.environ.get('REDIS_HOST', DEFAULT_REDIS_HOST)}:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
