@@ -341,13 +341,16 @@
         document.getElementById('cust_name').value = c.name;
         document.getElementById('cust_phone').value = c.phone;
         document.getElementById('cust_phone_display').innerText = c.phone;
-        
+
         document.getElementById('car_reg').value = c.car_register_no || '';
         document.getElementById('car_prov').value = c.car_province || '';
         document.getElementById('car_brand').value = c.car_brand || '';
         document.getElementById('car_model').value = c.car_model || '';
         document.getElementById('car_frame').value = c.car_frame_no || '';
-        document.getElementById('car_color').value = c.car_colour || '';
+        document.getElementById('car_color').value = c.car_color || '';
+
+        document.getElementById('mechanic_name').value = c.mechanic_name || '';
+        document.getElementById('sale_rep').value = c.sale_representative || '';
 
         custResult.style.display = 'none';
     }

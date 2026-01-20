@@ -39,7 +39,7 @@ cp .env.example .env
 ### 3. Build and run with Docker Compose
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 ລະບົບຈະເຮັດວຽກໃນພາກຫຼັງ ແລະ ຮັນ migrations ອັດຕະໂນມັດ
@@ -59,7 +59,7 @@ docker-compose up --build
 ### 5. Populate sample data (optional)
 
 ```bash
-docker-compose exec web python manage.py populate_data
+docker compose exec web python manage.py populate_data
 ```
 
 ## 🔧 Installation without Docker
@@ -117,73 +117,73 @@ daphne -b 0.0.0.0 -p 8000 config.asgi:application
 ### Start services
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 ### Start in background
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Stop services
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### View logs
 
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
 ### View specific service logs
 
 ```bash
-docker-compose logs -f web
-docker-compose logs -f db
-docker-compose logs -f redis
+docker compose logs -f web
+docker compose logs -f db
+docker compose logs -f redis
 ```
 
 ### Rebuild containers
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 ### Run Django management commands
 
 ```bash
-docker-compose exec web python manage.py <command>
+docker compose exec web python manage.py <command>
 ```
 
 Examples:
 
 ```bash
 # Run migrations
-docker-compose exec web python manage.py migrate
+docker compose exec web python manage.py migrate
 
 # Create superuser
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 
 # Populate data
-docker-compose exec web python manage.py populate_data
+docker compose exec web python manage.py populate_data
 
 # Django shell
-docker-compose exec web python manage.py shell
+docker compose exec web python manage.py shell
 ```
 
 ### Access database
 
 ```bash
-docker-compose exec db psql -U postgres -d kauto_db
+docker compose exec db psql -U postgres -d kauto_db
 ```
 
 ### Access Redis CLI
 
 ```bash
-docker-compose exec redis redis-cli
+docker compose exec redis redis-cli
 ```
 
 ### Connect from external tools
@@ -257,7 +257,7 @@ autoparts/
 ├── templates/           # Global templates
 ├── media/               # User uploads
 ├── Dockerfile           # Docker configuration
-├── docker-compose.yml   # Docker Compose configuration
+├── docker compose.yml   # Docker Compose configuration
 ├── requirements.txt     # Python dependencies
 ├── entrypoint.sh        # Docker entrypoint script
 ├── .env.example         # Environment variables example
@@ -319,7 +319,7 @@ autoparts/
 # Kill process on port 8000
 lsof -ti:8000 | xargs kill -9
 
-# Or use different port in docker-compose.yml
+# Or use different port in docker compose.yml
 ports:
   - "8001:8000"
 ````
@@ -328,20 +328,20 @@ ports:
 
 ```bash
 # Restart database service
-docker-compose restart db
+docker compose restart db
 
 # Check database logs
-docker-compose logs db
+docker compose logs db
 ```
 
 ### Redis connection error
 
 ```bash
 # Restart Redis service
-docker-compose restart redis
+docker compose restart redis
 
 # Check Redis logs
-docker-compose logs redis
+docker compose logs redis
 ```
 
 ## 📝 License

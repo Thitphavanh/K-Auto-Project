@@ -9,144 +9,167 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
-            body { background: white !important; padding: 0 !important; }
-            .page { box-shadow: none !important; padding: 20px !important; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .page { box-shadow: none !important; padding: 10px 15px !important; max-width: 100% !important; margin: 0 !important; }
+            @page {
+                size: A4;
+                margin: 8mm 10mm;
+            }
         }
         .bill-table th, .bill-table td { border: 2px solid #000; }
         body { font-family: 'Noto Sans Lao', sans-serif; }
+
+        /* A4 optimization */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body onload="window.print()" class="bg-gray-100 p-5">
 
-    <div class="page max-w-[900px] mx-auto bg-white p-10 shadow-lg">
+    <div class="page max-w-[900px] mx-auto bg-white p-6 shadow-lg">
         <!-- Header -->
-        <div class="flex justify-between items-start border-4 border-black p-4 mb-0">
-            <div class="flex items-center gap-6">
-                <div class="bg-red-600 border-4 border-yellow-400 rounded-2xl p-4 text-center">
-                    <div class="text-[10px] font-bold text-white leading-tight">ເຄອໍໂຕ້ລາວວເຊີວິຊ</div>
-                    <div class="text-5xl font-black text-white py-1">K</div>
-                    <div class="text-xs font-bold text-yellow-400 leading-tight">AUTO LAO<br>SERVICE</div>
-                </div>
-                <div class="flex-1 text-[13px] leading-relaxed text-black">
-                    <div class="font-bold text-sm mb-1">ວິສາຫະກິດສ່ວນບຸກຄົນອູ່ສ້ອມແປງລົດ ເຄອໍໂຕ້ລາວ ເຊີວິຊ</div>
+        <div class="flex justify-between items-start border-4 border-black p-2 mb-0 border-b-0">
+            <div class="flex items-center gap-4 w-full">
+                <img src="{% static 'images/k-auto-logo.JPG' %}" alt="K Auto Logo" class="w-24 h-auto object-contain">
+                <div class="flex-1 text-[10px] leading-snug text-black text-center pr-24">
+                    <div class="font-bold text-[11px] mb-0.5 uppercase">ວິສາຫະກິດສ່ວນບຸກຄົນອູ່ສ້ອມແປງລົດ ເຄອໍໂຕ້ລາວ ເຊີວິຊ</div>
                     <div>ບ້ານນາເລົ່າ ເມືອງໄກສອນພົມວິຫານ ແຂວງສະຫວັນນະເຂດ</div>
-                    <div class="mt-1">ໂທລະສັບ: + 856 20 96966610 / + 856 20 96964449</div>
-                    <div>ອີເມວ: kautolao@hotmail.com</div>
+                    <div class="mt-0.5">ໂທລະສັບ: + 856 20 96966610 / + 856 20 96964449 ອີເມວ: kautolao@hotmail.com</div>
                 </div>
-            </div>
-            <div class="text-right text-[13px] text-black">
-                <strong class="text-base font-bold">ເລກທີ :<br>No.</strong><br>
-                <span class="text-xl font-black text-red-600">{{ order.invoice_no }}</span>
             </div>
         </div>
 
         <!-- Customer Info Table -->
         <table class="w-full border-collapse bill-table border-t-0">
-            <tr class="text-[13px] text-black">
-                <td class="font-bold p-2 w-[15%] border-t-0" rowspan="2">ລູກຄ້າ :<br>Customer</td>
-                <td class="p-2 w-[35%] border-t-0" rowspan="2">
+            <!-- Row 1 -->
+            <tr class="text-[10px] text-black">
+                <td class="font-bold p-0.5 w-[12%] border-t-0">ລູກຄ້າ :<br>Customer</td>
+                <td class="p-0.5 w-[30%] border-t-0">
                     <div class="font-bold">{{ order.customer_name|default:"-" }}</div>
-                    {% if order.customer_phone %}<div class="text-xs">ເບີໂທ: {{ order.customer_phone }}</div>{% endif %}
+                    {% if order.customer_phone %}<div class="text-[9px]">{{ order.customer_phone }}</div>{% endif %}
                 </td>
-                <td class="font-bold p-2 w-[15%] border-t-0">ເລກ km<br>Mile No.</td>
-                <td class="p-2 border-t-0">{{ order.car_mileage|default:"-" }}</td>
-                <td class="font-bold p-2 w-[15%] border-t-0" rowspan="2">ວັນທີ :<br>Date</td>
-                <td class="p-2 border-t-0" rowspan="2">{{ order.date|date:"d-M-y" }}</td>
+                <td class="font-bold p-0.5 w-[10%] border-t-0 text-center">ເລກ km<br>Mile No.</td>
+                <td class="p-0.5 w-[18%] border-t-0 text-center">{{ order.car_mileage|default:"-" }}</td>
+                <td class="font-bold p-0.5 w-[10%] border-t-0 text-center">ເລກທີ :<br>No.</td>
+                <td class="p-0.5 w-[20%] border-t-0 text-center font-bold">{{ order.invoice_no }}</td>
             </tr>
-            <tr>
-                <td colspan="2" class="p-2 border-t-0"></td>
-            </tr>
-            <tr class="text-[13px] text-black">
-                <td class="font-bold p-2">ທະບຽນລົດ<br>Car Register No</td>
-                <td class="p-2">
-                    <span class="font-bold">{{ order.car_register_no|default:"-" }}</span> 
-                    {% if order.car_province %}{{ order.car_province }}{% endif %}<br>Province
+            <!-- Row 2 -->
+            <tr class="text-[10px] text-black">
+                <td class="font-bold p-0.5 border-t-0">ທະບຽນລົດ<br>Car Register No</td>
+                <td class="p-0.5 border-t-0">
+                    <span class="font-bold border-r border-black pr-2 mr-2">{{ order.car_register_no|default:"-" }}</span>
+                    <span class="text-[9px]">ແຂວງ/Province: {{ order.car_province|default:"-" }}</span>
                 </td>
-                <td class="font-bold p-2">ເລກໂມເດລ<br>Model :</td>
-                <td class="p-2">{{ order.car_model|default:"-" }}</td>
-                <td class="font-bold p-2">ເລກຕົວຖັງ<br>Frame No</td>
-                <td class="p-2">{{ order.car_frame_no|default:"-" }}</td>
+                <td class="font-bold p-0.5 border-t-0 text-center">ລຸ້ນ<br>Model :</td>
+                <td class="p-0.5 border-t-0 text-center">{{ order.car_model|default:"-" }}</td>
+                <td class="font-bold p-0.5 border-t-0 text-center">ວັນທີ :<br>Date</td>
+                <td class="p-0.5 border-t-0 text-center">{{ order.date|date:"d-M-y" }}</td>
             </tr>
-            <tr class="text-[13px] text-black">
-                <td class="font-bold p-2">ຢີຫໍ້ລົດ :<br>Brand :</td>
-                <td class="p-2">{{ order.car_brand|default:"-" }}</td>
-                <td colspan="2" class="p-2"></td>
-                <td class="font-bold p-2">ສີລົດ :<br>Colour:</td>
-                <td class="p-2">{{ order.car_color|default:"-" }}</td>
+            <!-- Row 3 -->
+            <tr class="text-[10px] text-black">
+                <td class="font-bold p-0.5 border-t-0">ຍີ່ຫໍ້ :<br>Brand :</td>
+                <td class="p-0.5 border-t-0">{{ order.car_brand|default:"-" }}</td>
+                <td class="font-bold p-0.5 border-t-0 text-center">ເລກຕົວຖັງ<br>Frame No</td>
+                <td class="p-0.5 border-t-0 text-center">{{ order.car_frame_no|default:"-" }}</td>
+                <td class="font-bold p-0.5 border-t-0 text-center">ສີ :<br>Colour:</td>
+                <td class="p-0.5 border-t-0 text-center">{{ order.car_color|default:"-" }}</td>
             </tr>
         </table>
 
         <!-- Customer Code Table -->
         <table class="w-full border-collapse bill-table border-t-0">
-            <tr class="text-[13px] text-black">
-                <td class="font-bold p-2 w-[15%] border-t-0">ລະຫັດລູກຄ້າ<br>Customer Code</td>
-                <td class="p-2 border-t-0">{{ order.customer_code|default:"-" }}</td>
-                <td class="font-bold p-2 w-[15%] border-t-0">ຊ່າງສ້ອມ<br>MECHANIC</td>
-                <td class="p-2 border-t-0">{{ order.mechanic_name|default:"-" }}</td>
-                <td class="font-bold p-2 w-[20%] border-t-0 text-center border-t-0" colspan="2">ພະນັກງານຂາຍ :<br>Sale Representative</td>
-                <td class="p-2 border-t-0">{{ order.sale_representative|default:"-" }}</td>
+            <tr class="text-[10px]">
+                <td class="font-bold p-0.5 w-[15%] border-t-0">ລະຫັດລູກຄ້າ<br>Customer Code</td>
+                <td class="p-0.5 border-t-0">{{ order.customer_code|default:"-" }}</td>
+                <td class="font-bold p-0.5 w-[15%] border-t-0">ຊ່າງສ້ອມ<br>MECHANIC</td>
+                <td class="p-0.5 border-t-0">{{ order.mechanic_name|default:"-" }}</td>
+                <td class="font-bold p-0.5 w-[20%] border-t-0" colspan="2">ພະນັກງານຂາຍ :<br>Sale Representative</td>
+                <td class="p-0.5 border-t-0">{{ order.sale_representative|default:"-" }}</td>
             </tr>
         </table>
 
         <!-- Items Table -->
         <table class="w-full border-collapse bill-table border-t-0">
             <thead>
-                <tr class="text-[12px] font-bold text-black text-center">
-                    <th class="p-2 w-12 border-t-0">ລຳດັບ<br>Item</th>
-                    <th class="p-2 w-28 border-t-0">ລະຫັດສິນຄ້າ<br>Ref. Code</th>
-                    <th class="p-2 border-t-0 text-left">ລາຍການ<br>Description</th>
-                    <th class="p-2 w-20 border-t-0">ຈຳນວນ<br>Quantity</th>
-                    <th class="p-2 w-16 border-t-0">ໜ່ວຍ<br>Unit</th>
-                    <th class="p-2 w-24 border-t-0 text-right">ລາຄາ<br>Unit Price</th>
-                    <th class="p-2 w-20 border-t-0">ສ່ວນຫຼຸດ<br>Discount</th>
-                    <th class="p-2 w-28 border-t-0 text-right">ຈຳນວນເງິນ<br>Amount</th>
+                <tr class="text-[9px] font-bold text-black text-center bg-gray-200">
+                    <th class="p-0.5 w-10 border-t-0">ລຳດັບ<br>Item</th>
+                    <th class="p-0.5 w-24 border-t-0">ລະຫັດສິນຄ້າ<br>Ref. Code</th>
+                    <th class="p-0.5 border-t-0 text-center">ລາຍການ<br>Description</th>
+                    <th class="p-0.5 w-16 border-t-0">ຈຳນວນ<br>Quantity</th>
+                    <th class="p-0.5 w-16 border-t-0">ໜ່ວຍ<br>Unit</th>
+                    <th class="p-0.5 w-24 border-t-0 text-right">ລາຄາ<br>Unit Price</th>
+                    <th class="p-0.5 w-20 border-t-0">ສ່ວນຫຼຸດ<br>Discount</th>
+                    <th class="p-0.5 w-28 border-t-0 text-right">ຈຳນວນເງິນ<br>Amount</th>
                 </tr>
             </thead>
-            <tbody class="text-[13px] text-black">
+            <tbody class="text-[10px] text-black">
                 {% for item in order.items.all %}
                 <tr>
-                    <td class="p-2 text-center">{{ forloop.counter }}</td>
-                    <td class="p-2 text-center">{{ item.ref_code|default:"-" }}</td>
-                    <td class="p-2 text-left">{{ item.description }}</td>
-                    <td class="p-2 text-center">{{ item.quantity|floatformat:2 }}</td>
-                    <td class="p-2 text-center">{{ item.unit }}</td>
-                    <td class="p-2 text-right">{{ item.unit_price|floatformat:2|intcomma }}</td>
-                    <td class="p-2 text-center">{{ item.discount_percent|floatformat:0 }}%</td>
-                    <td class="p-2 text-right font-bold">{{ item.amount|floatformat:2|intcomma }}</td>
+                    <td class="p-0.5 text-center border-b-0 border-t-0">{{ forloop.counter }}</td>
+                    <td class="p-0.5 text-left border-b-0 border-t-0">{{ item.ref_code|default:"-" }}</td>
+                    <td class="p-0.5 text-left border-b-0 border-t-0">{{ item.description }}</td>
+                    <td class="p-0.5 text-center border-b-0 border-t-0">{{ item.quantity|floatformat:2 }}</td>
+                    <td class="p-0.5 text-center border-b-0 border-t-0">{{ item.unit }}</td>
+                    <td class="p-0.5 text-right border-b-0 border-t-0">{{ item.unit_price|floatformat:2|intcomma }}</td>
+                    <td class="p-0.5 text-center border-b-0 border-t-0">{{ item.discount_percent|floatformat:0 }}%</td>
+                    <td class="p-0.5 text-right font-bold border-b-0 border-t-0">{{ item.amount|floatformat:2|intcomma }}</td>
                 </tr>
                 {% empty %}
                 {% for i in "12345" %}
-                <tr><td class="p-2 text-center">{{ i }}</td><td colspan="7" class="p-2"></td></tr>
+                <tr><td class="p-0.5 text-center border-b-0 border-t-0">{{ i }}</td><td colspan="7" class="p-0.5 border-b-0 border-t-0"></td></tr>
                 {% endfor %}
                 {% endfor %}
                 
-                <tr class="font-bold bg-gray-50 border-t-2 border-black">
-                    <td colspan="5" class="p-2 text-right">ລວມຍອດສ່ວນຫຼຸດ</td>
-                    <td class="p-2 text-center">₭</td>
-                    <td class="p-2 text-right">{{ order.discount_lak|floatformat:2|intcomma }}</td>
-                    <td class="p-2 text-center">฿</td>
+                <!-- Total Discount Row -->
+                <tr class="font-bold border-t border-black">
+                    <td colspan="5" class="p-0.5 text-left border-r-0">ລວມຍອດສ່ວນຫຼຸດ</td>
+                    <td class="p-0.5 text-right border-l-0 border-r-0">-</td>
+                    <td class="p-0.5 text-center border-l-0">
+                        <span class="mr-1">K</span> {{ order.discount_lak|floatformat:2|intcomma }}
+                    </td>
+                    <td class="p-0.5 text-right">
+                        <div class="flex justify-end items-center gap-2">
+                            <span><span class="mr-1">฿</span> {{ order.discount_thb|floatformat:2|intcomma }}</span>
+                            <div class="border-l border-black h-4"></div>
+                            <span><span class="mr-1">$</span> {{ order.discount_usd|floatformat:2|intcomma }}</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Note and Totals -->
+                <tr>
+                    <td colspan="4" rowspan="2" class="p-0.5 text-left align-top"><span class="font-bold">ໝາຍເຫດ :</span> {{ order.remarks|default:"" }}</td>
+                    <td colspan="2" class="p-0.5 text-right font-bold">ລວມເງິນ/Total</td>
+                    <td class="p-0.5 text-center font-bold">K {{ order.subtotal_lak|floatformat:0|intcomma }}</td>
+                    <td class="p-0.5 text-right font-bold">
+                        <div class="flex justify-end items-center gap-2">
+                            <span><span class="mr-1">฿</span> {{ order.subtotal_thb|floatformat:2|intcomma }}</span>
+                            <div class="border-l border-black h-4"></div>
+                            <span><span class="mr-1">$</span> {{ order.subtotal_usd|floatformat:2|intcomma }}</span>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
-                    <td colspan="2" rowspan="2" class="p-2 text-left align-top"><span class="font-bold">ໝາຍເຫດ :</span></td>
-                    <td colspan="3" class="p-2 text-right font-bold">ລວມເງິນ/Total</td>
-                    <td class="p-2 text-center font-bold">₭</td>
-                    <td class="p-2 text-right font-bold">{{ order.subtotal_lak|floatformat:0|intcomma }}</td>
-                    <td class="p-2 text-center font-bold">฿</td>
+                    <td colspan="2" class="p-0.5 text-right font-bold">ອາກອນ/Tax</td>
+                    <td class="p-0.5 text-center">{{ order.tax_percent|floatformat:0 }}%</td>
+                    <td class="p-0.5 text-center">-</td>
                 </tr>
-                <tr>
-                    <td colspan="3" class="p-2 text-right font-bold">ອາກອນ/Tax</td>
-                    <td class="p-2 text-center">{{ order.tax_percent|floatformat:0 }}%</td>
-                    <td class="p-2 text-right">{{ order.tax_amount_lak|floatformat:0|intcomma }}</td>
-                    <td class="p-2 text-right text-black">{{ order.tax_amount_thb|floatformat:2|intcomma }}</td>
-                </tr>
-                <tr class="bg-gray-50 font-black">
-                    <td colspan="2" rowspan="2" class="p-2 text-left align-top font-bold">ຕົວອັກສອນ</td>
-                    <td colspan="3" class="p-2 text-right text-lg">ລວມສຸດທິ/Net Amount:</td>
-                    <td class="p-2 text-right text-lg">₭{{ order.net_amount_lak|floatformat:0|intcomma }}</td>
-                </tr>
-                <tr class="font-black">
-                    <td class="p-2 text-right text-base" colspan="1">฿{{ order.net_amount_thb|floatformat:2|intcomma }}</td>
-                    <td class="p-2 text-center font-bold" colspan="1">${{ order.net_amount_usd|floatformat:2|intcomma }}</td>
+
+                <!-- Net Amount Row -->
+                <tr class="font-black bg-gray-50">
+                    <td colspan="4" rowspan="1" class="p-0.5 text-left align-top font-bold">ຕົວອັກສອນ</td>
+                    <td colspan="2" class="p-0.5 text-right">ລວມສຸດທິ/Net Amount:</td>
+                    <td class="p-0.5 text-center font-bold">K {{ order.net_amount_lak|floatformat:0|intcomma }}</td>
+                    <td class="p-0.5 text-right font-bold">
+                        <div class="flex justify-end items-center gap-2">
+                            <span><span class="mr-1">฿</span> {{ order.net_amount_thb|floatformat:2|intcomma }}</span>
+                            <div class="border-l border-black h-4"></div>
+                            <span><span class="mr-1">$</span> {{ order.net_amount_usd|floatformat:2|intcomma }}</span>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -154,35 +177,35 @@
         <!-- Payment Section -->
         <table class="w-full border-collapse bill-table border-t-0">
             <thead>
-                <tr class="text-[12px] font-bold text-black border-t-0 text-center">
-                    <th class="p-2 border-t-0">ຮັບເງິນໂດຍ<br>Received By</th>
-                    <th class="p-2 border-t-0">ເລກທີເຊັກ<br>Check No.</th>
-                    <th class="p-2 border-t-0">ວັນທີໃນເຊັກ<br>Check Date</th>
-                    <th class="p-2 border-t-0">ທະນາຄານ<br>Bank</th>
-                    <th class="p-2 border-t-0">ສາຂາ<br>Branch</th>
-                    <th class="p-2 border-t-0">ຈຳນວນເງິນ<br>Amount</th>
+                <tr class="text-[9px] font-bold text-black border-t-0 text-center">
+                    <th class="p-0.5 border-t-0 w-[20%]">ການຈ່າຍເງິນ<br>Payment</th>
+                    <th class="p-0.5 border-t-0">ເລກທີເຊັກ<br>Check No.</th>
+                    <th class="p-0.5 border-t-0">ວັນທີໃນເຊັກ<br>Check Date</th>
+                    <th class="p-0.5 border-t-0">ທະນາຄານ<br>Bank</th>
+                    <th class="p-0.5 border-t-0">ສາຂາ<br>Branch</th>
+                    <th class="p-0.5 border-t-0">ຈຳນວນເງິນ<br>Amount</th>
                 </tr>
             </thead>
-            <tbody class="text-[13px] text-black">
+            <tbody class="text-[10px]">
                 <tr>
-                    <td class="p-4 border-t-0">
-                        <div class="space-y-1">
-                            <label class="flex items-center gap-2"><input type="checkbox" {% if order.payment_cash %}checked{% endif %}> ເງິນສົດ</label>
-                            <label class="flex items-center gap-2"><input type="checkbox" {% if order.payment_check %}checked{% endif %}> ໃຊ້ບັດທະນາຄານ</label>
-                            <label class="flex items-center gap-2"><input type="checkbox" {% if order.payment_credit %}checked{% endif %}> ບໍ່ຕີດໜີ້</label>
+                    <td class="p-1 border-t-0 align-top">
+                        <div class="space-y-0.5">
+                            <label class="flex items-center gap-1"><input type="checkbox" class="rounded text-red-600 focus:ring-red-500" {% if order.payment_cash %}checked{% endif %}> ເງິນສົດ</label>
+                            <label class="flex items-center gap-1"><input type="checkbox" class="rounded text-red-600 focus:ring-red-500" {% if order.payment_check %}checked{% endif %}> ໂອນ</label>
+                            <label class="flex items-center gap-1"><input type="checkbox" class="rounded text-red-600 focus:ring-red-500" {% if order.payment_credit %}checked{% endif %}> ເຊັກ</label>
                         </div>
                     </td>
-                    <td class="p-2 text-center border-t-0">{{ order.check_no|default:"" }}</td>
-                    <td class="p-2 text-center border-t-0">{% if order.check_date %}{{ order.check_date|date:"d-M-y" }}{% endif %}</td>
-                    <td class="p-2 text-center border-t-0">{{ order.bank_name|default:"" }}</td>
-                    <td class="p-2 text-center border-t-0">{{ order.bank_branch|default:"" }}</td>
-                    <td class="p-2 text-right border-t-0 font-bold">
+                    <td class="p-0.5 text-center border-t-0">{{ order.check_no|default:"" }}</td>
+                    <td class="p-0.5 text-center border-t-0">{% if order.check_date %}{{ order.check_date|date:"d-M-y" }}{% endif %}</td>
+                    <td class="p-0.5 text-center border-t-0">{{ order.bank_name|default:"" }}</td>
+                    <td class="p-0.5 text-center border-t-0">{{ order.bank_branch|default:"" }}</td>
+                    <td class="p-0.5 text-right border-t-0 font-bold">
                         {% if order.payment_amount_cash > 0 %}
-                            ฿{{ order.payment_amount_cash|floatformat:2|intcomma }}
+                            {{ order.payment_amount_cash|floatformat:2|intcomma }}
                         {% elif order.payment_amount_check > 0 %}
-                            ฿{{ order.payment_amount_check|floatformat:2|intcomma }}
+                            {{ order.payment_amount_check|floatformat:2|intcomma }}
                         {% elif order.payment_amount_credit > 0 %}
-                            ฿{{ order.payment_amount_credit|floatformat:2|intcomma }}
+                            {{ order.payment_amount_credit|floatformat:2|intcomma }}
                         {% endif %}
                     </td>
                 </tr>
@@ -191,27 +214,28 @@
 
         <!-- Signature Section -->
         <table class="w-full border-collapse bill-table border-t-0">
-            <tr class="text-[13px] text-center text-black">
-                <td class="p-2 pt-16 border-t-0 w-1/3">
-                    <div class="border-b border-black mb-1 mx-4"></div>
+            <tr class="text-[10px] text-center">
+                <td class="p-1 pt-8 border-t-0 w-1/3">
+                    <div class="border-b border-black mb-0.5 mx-4"></div>
                     <div class="font-bold">ຜູ້ຮັບເງິນ / Received By</div>
-                    <div class="mt-4 text-xs">ວັນທີ / Date: ____/____/____</div>
+                    <div class="mt-2 text-[9px]">ວັນທີ / Date: {% if order.received_by_date %}{{ order.received_by_date|date:"d/m/Y" }}{% else %}____/____/____{% endif %}</div>
                 </td>
-                <td class="p-2 pt-16 border-t-0 w-1/3">
-                    <div class="border-b border-black mb-1 mx-4"></div>
+                <td class="p-1 pt-8 border-t-0 w-1/3">
+                    <div class="border-b border-black mb-0.5 mx-4"></div>
                     <div class="font-bold">ຜູ້ຈ່າຍເງິນ / Paid By</div>
-                    <div class="mt-4 text-xs">ວັນທີ / Date: ____/____/____</div>
+                    <div class="mt-2 text-[9px]">ວັນທີ / Date: {% if order.paid_by_date %}{{ order.paid_by_date|date:"d/m/Y" }}{% else %}____/____/____{% endif %}</div>
                 </td>
-                <td class="p-2 pt-16 border-t-0 w-1/3">
-                    <div class="border-b border-black mb-1 mx-4"></div>
+                <td class="p-1 pt-8 border-t-0 w-1/3">
+                    <div class="border-b border-black mb-0.5 mx-4"></div>
                     <div class="font-bold">ຜູ້ຮັບສິນຄ້າ / Good Received By</div>
-                    <div class="mt-4 text-xs">ວັນທີ / Date: ____/____/____</div>
+                    <div class="mt-2 text-[9px]">ວັນທີ / Date: {% if order.good_received_by_date %}{{ order.good_received_by_date|date:"d/m/Y" }}{% else %}____/____/____{% endif %}</div>
                 </td>
             </tr>
         </table>
 
-        <div class="mt-5 text-center text-[11px] text-gray-500">
-            <p>{% now "d/m/Y H:i" %}</p>
+        <div class="mt-4 flex justify-between text-[9px] text-gray-400">
+            <p>ພິມເມື່ອ: {% now "d/m/Y H:i" %}</p>
+            <p>Page 1 of 1</p>
         </div>
     </div>
 

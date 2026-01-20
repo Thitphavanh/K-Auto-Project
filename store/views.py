@@ -286,6 +286,8 @@ def api_search_customer(request):
             "car_frame_no": c.car_frame_no,
             "car_color": c.car_color,
             "car_mileage": c.car_mileage,
+            "mechanic_name": c.mechanic_name,
+            "sale_representative": c.sale_representative,
             "display": f"{c.name} - {c.phone}"
         })
         
