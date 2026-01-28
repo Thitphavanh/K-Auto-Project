@@ -102,7 +102,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="stat-title" data-translate="total_products">ສິນຄ້າທັງໝົດ</p>
-                <p class="stat-value text-purple-600">0</p>
+                <p class="stat-value text-purple-600">{{ product_count|default:0 }}</p>
                 <p class="text-sm text-gray-500" data-translate="items">ລາຍການ</p>
             </div>
             <div class="text-purple-600">
@@ -118,7 +118,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="stat-title" data-translate="low_stock">ສິນຄ້າໃກ້ໝົດ</p>
-                <p class="stat-value text-red-600">0</p>
+                <p class="stat-value text-red-600">{{ low_stock_count|default:0 }}</p>
                 <p class="text-sm text-gray-500" data-translate="items">ລາຍການ</p>
             </div>
             <div class="text-red-600">
@@ -142,14 +142,14 @@
     <div class="chart-container">
         <h3 class="text-xl font-bold text-gray-900 mb-4" data-translate="recent_activities">ການເຄື່ອນໄຫວລ່າສຸດ</h3>
         <div class="space-y-3">
-            {% for t in recent_transactions %}
+            {% for order in recent_orders %}
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div class="flex-1">
-                    <p class="font-medium text-gray-900">{{ t.product.name }}</p>
-                    <p class="text-sm text-gray-500">{{ t.transaction_type }} | {{ t.created_at|date:"H:i" }}</p>
+                    <p class="font-medium text-gray-300">#{{ order.invoice_no }}</p>
+                    <p class="text-sm text-gray-500">{{ order.customer_name|default:"ລູກຄ້າທົ່ວໄປ" }} | {{ order.date|date:"d/m/Y" }}</p>
                 </div>
-                <span class="px-3 py-1 text-sm font-medium rounded-full {% if t.transaction_type == 'OUT' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                    {{ t.amount }}
+                <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                    ฿{{ order.subtotal_thb|floatformat:0 }}
                 </span>
             </div>
             {% empty %}

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     path("", views.home_view, name="home"),  # Home page
     path(
@@ -34,4 +35,11 @@ urlpatterns = [
     path("orders/<str:invoice_no>/update/", views.order_update, name="order_update"),
     path("orders/<str:invoice_no>/delete/", views.order_delete, name="order_delete"),
     path("orders/<str:invoice_no>/print/", views.order_print, name="order_print"),
+
+    # Quotation System
+    path("quotations/", views.quotation_list, name="quotation_list"),
+    path("quotations/create/", views.quotation_create, name="quotation_create"),
+    path("quotations/<int:pk>/", views.quotation_detail, name="quotation_detail"),
+    path("quotations/<int:pk>/delete/", views.quotation_delete, name="quotation_delete"),
+    path("quotations/<int:pk>/to-order/", views.quotation_to_order, name="quotation_to_order"),
 ]

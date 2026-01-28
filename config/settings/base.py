@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",  # For number formatting (intcomma, etc.)
     "channels",  # Django Channels for WebSocket
     "store",
+    "accounting",
 ]
 
 MIDDLEWARE = [
@@ -251,7 +252,7 @@ JAZZMIN_SETTINGS = {
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
     "site_brand": "K-Auto",
     # Logo to use for your site, must be present in static files, used for brand on top left
-    "site_logo": "images/logo.png",
+    "site_logo": "images/k-auto-logo.JPG",
     # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
     "login_logo": None,
     # Logo to use for login form in dark themes (defaults to login_logo)

@@ -1,63 +1,70 @@
-<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+{% load static %}
+<nav class="bg-white border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
     <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
-            <!-- Logo -->
-            <div class="flex items-center">
-                <a href="{% url 'home' %}" class="text-2xl font-bold text-gray-900">
-                    K-Auto
+            <!-- Logo & Contact -->
+            <div class="flex items-center gap-4">
+                <a href="{% url 'home' %}" class="flex items-center gap-2">
+                    <img src="{% static 'images/k-auto-logo.JPG' %}" alt="K-Auto Logo" class="h-10 w-auto rounded-lg">
                 </a>
             </div>
 
-            <!-- Navigation Menu -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="{% url 'product-list' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="products">
+            <!-- Navigation Menu (Desktop Only - lg and above) -->
+            <div class="hidden lg:flex items-center space-x-6">
+                <a href="{% url 'product-list' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="products">
                     ສິນຄ້າ
                 </a>
-                <a href="{% url 'dashboard' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="dashboard">
+                <a href="{% url 'dashboard' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="dashboard">
                     ແດັສບອດ
                 </a>
-                <a href="{% url 'pos' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="pos">
+                <a href="{% url 'accounting:dashboard' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="accounting">
+                    ບັນຊີ
+                </a>
+                <a href="{% url 'pos' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="pos">
                     ຂາຍສິນຄ້າ
                 </a>
-                <a href="{% url 'stock-in' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="stock">
+                <a href="{% url 'stock-in' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="stock">
                     ສິນຄ້າເຂົ້າ
                 </a>
-                <a href="{% url 'input-bill' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="input-bill">
+                <a href="{% url 'input-bill' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="input-bill">
                     ອອກບິນໃຫ້ລູກຄ້າ
                 </a>
-                <a href="{% url 'order_list' %}" class="text-gray-900 hover:text-gray-600 font-medium" data-translate="order-list">
+                <a href="{% url 'order_list' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="order-list">
                     ລາຍການບິນທັງໝົດ
+                </a>
+                <a href="{% url 'quotation_list' %}" class="hover:text-blue-600 dark:hover:text-blue-400 font-medium" data-translate="quotation-list">
+                    ໃບສະເໜີລາຄາ
                 </a>
             </div>
 
-            <!-- Right Side: Language Switcher & Dark Mode Toggle -->
-            <div class="flex items-center space-x-4">
+            <!-- Right Side: Language Switcher & Dark Mode Toggle & Hamburger -->
+            <div class="flex items-center space-x-2">
                 <!-- Language Switcher -->
                 <div class="relative">
-                    <button id="languageBtn" class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-900">
+                    <button id="languageBtn" class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
                         </svg>
-                        <span id="currentLang" class="font-medium">ລາວ</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span id="currentLang" class="font-medium hidden sm:inline">ລາວ</span>
+                        <svg class="w-4 h-4 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
-                    <div id="languageMenu" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg">
-                        <button onclick="changeLanguage('lo')" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-900 rounded-t-lg">
+                    <div id="languageMenu" class="z-50 hidden absolute right-0 mt-2 w-40 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                        <button onclick="changeLanguage('lo')" class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg">
                             🇱🇦 ພາສາລາວ
                         </button>
-                        <button onclick="changeLanguage('th')" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-900">
+                        <button onclick="changeLanguage('th')" class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                             🇹🇭 ภาษาไทย
                         </button>
-                        <button onclick="changeLanguage('en')" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-900 rounded-b-lg">
+                        <button onclick="changeLanguage('en')" class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg">
                             🇺🇸 English
                         </button>
                     </div>
                 </div>
 
                 <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-50 text-gray-900">
+                <button id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                     <svg id="sunIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
@@ -66,34 +73,43 @@
                     </svg>
                 </button>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-50 text-gray-900">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Hamburger Menu Button (Show below lg breakpoint = iPad & Mobile) -->
+                <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden pb-4">
-            <a href="{% url 'product-list' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="products">
+        <!-- Mobile Menu (iPad & Mobile) -->
+        <div id="mobileMenu" class="hidden lg:hidden pb-4 border-t border-gray-200 dark:border-gray-700 pt-2">
+            <a href="{% url 'product-list' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="products">
                 ສິນຄ້າ
             </a>
-            <a href="{% url 'dashboard' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="dashboard">
+            <a href="{% url 'dashboard' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="dashboard">
                 ແດັສບອດ
             </a>
-            <a href="{% url 'pos' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="pos">
+            <a href="{% url 'accounting:dashboard' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="accounting">
+                ບັນຊີ
+            </a>
+            <a href="{% url 'pos' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="pos">
                 ຂາຍສິນຄ້າ
             </a>
-            <a href="{% url 'stock-in' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="stock">
+            <a href="{% url 'stock-in' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="stock">
                 ສິນຄ້າເຂົ້າ
             </a>
-            <a href="{% url 'input-bill' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="input-bill">
+            <a href="{% url 'input-bill' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="input-bill">
                 ອອກບິນໃຫ້ລູກຄ້າ
             </a>
-            <a href="{% url 'order_list' %}" class="block py-2 text-gray-900 hover:text-gray-600" data-translate="order-list">
+            <a href="{% url 'order_list' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="order-list">
                 ລາຍການບິນທັງໝົດ
+            </a>
+            <a href="{% url 'quotation_list' %}" class="block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg" data-translate="quotation-list">
+                ໃບສະເໜີລາຄາ
             </a>
         </div>
     </div>
@@ -135,5 +151,7 @@
     // Mobile menu toggle
     document.getElementById('mobileMenuBtn').addEventListener('click', function() {
         document.getElementById('mobileMenu').classList.toggle('hidden');
+        document.getElementById('hamburgerIcon').classList.toggle('hidden');
+        document.getElementById('closeIcon').classList.toggle('hidden');
     });
 </script>

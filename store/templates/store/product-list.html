@@ -37,190 +37,7 @@
         color: rgba(0,0,0,0.8);
     }
 
-    /* Minimalist Filter Section */
-    .filter-section {
-        background: #ffffff;
-        border-radius: 0;
-        padding: 40px;
-        box-shadow: none;
-        border: 2px solid #000000;
-        margin-bottom: 50px;
-    }
 
-    .dark-mode .filter-section {
-        background: #000000;
-        border-color: #ffffff;
-        box-shadow: none;
-    }
-
-    .filter-label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #000000;
-        margin-bottom: 8px;
-    }
-
-    .dark-mode .filter-label {
-        color: #ffffff;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 14px 20px;
-        border: 2px solid #000000;
-        border-radius: 0;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-        background: #ffffff;
-        color: #000000;
-        font-weight: 500;
-    }
-
-    .search-input:focus {
-        outline: none;
-        border-color: #000000;
-        box-shadow: inset 0 0 0 2px #000000;
-    }
-
-    .search-input::placeholder {
-        color: #999999;
-    }
-
-    .dark-mode .search-input {
-        background: #000000;
-        border-color: #ffffff;
-        color: #ffffff;
-    }
-
-    .dark-mode .search-input:focus {
-        border-color: #ffffff;
-        box-shadow: inset 0 0 0 2px #ffffff;
-    }
-
-    .dark-mode .search-input::placeholder {
-        color: #666666;
-    }
-
-    .filter-select {
-        width: 100%;
-        padding: 14px 20px;
-        border: 2px solid #000000;
-        border-radius: 0;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-        background: #ffffff;
-        color: #000000;
-        cursor: pointer;
-        font-weight: 500;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000000' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        padding-right: 40px;
-    }
-
-    .filter-select:focus {
-        outline: none;
-        border-color: #000000;
-        box-shadow: inset 0 0 0 2px #000000;
-    }
-
-    .dark-mode .filter-select {
-        background: #000000;
-        border-color: #ffffff;
-        color: #ffffff;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    }
-
-    .dark-mode .filter-select:focus {
-        border-color: #ffffff;
-        box-shadow: inset 0 0 0 2px #ffffff;
-    }
-
-    .filter-btn {
-        padding: 14px 40px;
-        background: #000000;
-        color: #ffffff;
-        border: 2px solid #000000;
-        border-radius: 0;
-        font-weight: 700;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .filter-btn:hover {
-        background: #ffffff;
-        color: #000000;
-        transform: translateY(-2px);
-    }
-
-    .filter-btn:active {
-        transform: translateY(0);
-    }
-
-    .dark-mode .filter-btn {
-        background: #ffffff;
-        color: #000000;
-        border-color: #ffffff;
-    }
-
-    .dark-mode .filter-btn:hover {
-        background: #000000;
-        color: #ffffff;
-    }
-
-    .reset-btn {
-        padding: 14px 40px;
-        background: transparent;
-        color: #000000;
-        border: 2px solid #000000;
-        border-radius: 0;
-        font-weight: 700;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .reset-btn:hover {
-        background: #000000;
-        color: #ffffff;
-        transform: translateY(-2px);
-    }
-
-    .reset-btn:active {
-        transform: translateY(0);
-    }
-
-    .dark-mode .reset-btn {
-        background: transparent;
-        color: #ffffff;
-        border-color: #ffffff;
-    }
-
-    .dark-mode .reset-btn:hover {
-        background: #ffffff;
-        color: #000000;
-    }
-
-    .filter-divider {
-        height: 2px;
-        background: #000000;
-        margin: 30px 0;
-    }
-
-    .dark-mode .filter-divider {
-        background: #ffffff;
-    }
 
     .product-card {
         background: white;
@@ -485,67 +302,84 @@
 
 <div class="container mx-auto px-4 py-8">
     <!-- Filter Section -->
-    <div class="filter-section">
+    <div class="p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-12">
         <form method="GET" action="{% url 'product-list' %}">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <!-- Search -->
                 <div class="lg:col-span-2">
-                    <label class="filter-label" data-translate="label_search">🔍 ຄົ້ນຫາສິນຄ້າ</label>
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ search_query }}"
-                        placeholder="ພິມຊື່ສິນຄ້າ ຫຼື ລະຫັດບາໂຄດ..."
-                        class="search-input"
-                        data-translate-placeholder="search_placeholder"
-                    >
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-2" data-translate="label_search">ຄົ້ນຫາສິນຄ້າ</label>
+                    <div class="relative">
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="ພິມຊື່ສິນຄ້າ ຫຼື ລະຫັດບາໂຄດ..."
+                            class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500 transition-all font-medium"
+                            data-translate-placeholder="search_placeholder"
+                        >
+                    </div>
                 </div>
 
                 <!-- Category Filter -->
                 <div>
-                    <label class="filter-label" data-translate="label_category">📦 ໝວດໝູ່</label>
-                    <select name="category" class="filter-select">
-                        <option value="" data-translate="all_categories">ທັງໝົດ</option>
-                        {% for category in categories %}
-                            <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
-                                {{ category.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-2" data-translate="label_category">ໝວດໝູ່</label>
+                    <div class="relative">
+                        <select name="category" class="text-gray-400 dark:text-gray-500 w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium appearance-none pr-10">
+                            <option value="" data-translate="all_categories">ທັງໝົດ</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Brand Filter -->
                 <div>
-                    <label class="filter-label" data-translate="label_brand">🏷️ ຍີ່ຫໍ້</label>
-                    <select name="brand" class="filter-select">
-                        <option value="" data-translate="all_brands">ທັງໝົດ</option>
-                        {% for brand in brands %}
-                            <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>
-                                {{ brand.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-2" data-translate="label_brand">ຍີ່ຫໍ້</label>
+                    <div class="relative">
+                        <select name="brand" class="text-gray-400 dark:text-gray-500 w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium appearance-none pr-10">
+                            <option value="" data-translate="all_brands">ທັງໝົດ</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ brand.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="filter-divider"></div>
+            <div class="h-px bg-gray-200 dark:bg-gray-700 my-8 w-full"></div>
 
             <!-- Sort and Actions -->
             <div class="flex flex-wrap gap-4 items-end">
                 <div class="flex-1" style="min-width: 250px;">
-                    <label class="filter-label" data-translate="label_sort">⇅ ຈັດລຽງ</label>
-                    <select name="sort" class="filter-select">
-                        <option value="-id" {% if sort_by == '-id' %}selected{% endif %} data-translate="sort_latest">ລ່າສຸດກ່ອນ</option>
-                        <option value="name" {% if sort_by == 'name' %}selected{% endif %} data-translate="sort_name_asc">ຊື່ A-Z</option>
-                        <option value="-name" {% if sort_by == '-name' %}selected{% endif %} data-translate="sort_name_desc">ຊື່ Z-A</option>
-                        <option value="sell_price" {% if sort_by == 'sell_price' %}selected{% endif %} data-translate="sort_price_asc">ລາຄາຕ່ຳ-ສູງ</option>
-                        <option value="-sell_price" {% if sort_by == '-sell_price' %}selected{% endif %} data-translate="sort_price_desc">ລາຄາສູງ-ຕ່ຳ</option>
-                        <option value="-quantity" {% if sort_by == '-quantity' %}selected{% endif %} data-translate="sort_stock">ສະຕັອກຫຼາຍ</option>
-                    </select>
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-2" data-translate="label_sort">⇅ ຈັດລຽງ</label>
+                    <div class="relative">
+                        <select name="sort" class="text-gray-400 dark:text-gray-500 w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium appearance-none pr-10">
+                            <option value="-id" {% if sort_by == '-id' %}selected{% endif %} data-translate="sort_latest">ລ່າສຸດກ່ອນ</option>
+                            <option value="name" {% if sort_by == 'name' %}selected{% endif %} data-translate="sort_name_asc">ຊື່ A-Z</option>
+                            <option value="-name" {% if sort_by == '-name' %}selected{% endif %} data-translate="sort_name_desc">ຊື່ Z-A</option>
+                            <option value="sell_price" {% if sort_by == 'sell_price' %}selected{% endif %} data-translate="sort_price_asc">ລາຄາຕ່ຳ-ສູງ</option>
+                            <option value="-sell_price" {% if sort_by == '-sell_price' %}selected{% endif %} data-translate="sort_price_desc">ລາຄາສູງ-ຕ່ຳ</option>
+                            <option value="-quantity" {% if sort_by == '-quantity' %}selected{% endif %} data-translate="sort_stock">ສະຕັອກຫຼາຍ</option>
+                        </select>
+                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" class="filter-btn" data-translate="apply_filter">ຄົ້ນຫາ</button>
-                <a href="{% url 'product-list' %}" class="reset-btn" data-translate="reset_filter">ລ້າງ</a>
+                <button type="submit" class="px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-2 border-transparent rounded-xl font-bold uppercase tracking-wider hover:bg-gray-700 dark:hover:bg-gray-200 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900" data-translate="apply_filter">ຄົ້ນຫາ</button>
+                <a href="{% url 'product-list' %}" class="px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-2 border-transparent rounded-xl font-bold uppercase tracking-wider hover:bg-gray-700 dark:hover:bg-gray-200 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 hover:-translate-y-0.5" data-translate="reset_filter">ລ້າງ</a>
             </div>
         </form>
     </div>
@@ -646,9 +480,9 @@
             ...window.translations.lo,
             products_list_title: 'ລາຍການສິນຄ້າທັງໝົດ',
             products_list_subtitle: 'ຄົ້ນຫາ ແລະ ເລືອກສິນຄ້າທີ່ທ່ານຕ້ອງການ',
-            label_search: '🔍 ຄົ້ນຫາສິນຄ້າ',
-            label_category: '📦 ໝວດໝູ່',
-            label_brand: '🏷️ ຍີ່ຫໍ້',
+            label_search: 'ຄົ້ນຫາສິນຄ້າ',
+            label_category: 'ໝວດໝູ່',
+            label_brand: 'ຍີ່ຫໍ້',
             label_sort: '⇅ ຈັດລຽງ',
             search_placeholder: 'ພິມຊື່ສິນຄ້າ ຫຼື ລະຫັດບາໂຄດ...',
             all_categories: 'ທັງໝົດ',

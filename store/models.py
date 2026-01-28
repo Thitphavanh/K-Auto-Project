@@ -283,14 +283,14 @@ class Order(models.Model):
         items = self.items.all()
         
         # ຄິດໄລ່ຍອດລວມ (Subtotal)
-        self.subtotal_thb = sum(item.amount for item in items)
+        self.subtotal_thb = sum(items.values_list('amount', flat=True)) or Decimal(0)
         
         # ຄິດໄລ່ສ່ວນຫຼຸດລວມ
-        self.discount_thb = sum(item.discount_amount for item in items)
+        self.discount_thb = sum(items.values_list('discount_amount', flat=True)) or Decimal(0)
         
         # ຄິດໄລ່ອາກອນ
         subtotal_after_discount = self.subtotal_thb - self.discount_thb
-        self.tax_amount_thb = (subtotal_after_discount * self.tax_percent) / 100
+        self.tax_amount_thb = (subtotal_after_discount * self.tax_percent) / Decimal(100)
         
         # ຄິດໄລ່ລວມສຸດທິ
         self.net_amount_thb = subtotal_after_discount + self.tax_amount_thb
@@ -299,11 +299,12 @@ class Order(models.Model):
         from .models import CurrencyRate
         rates = {r.currency_code: r.rate_to_thb for r in CurrencyRate.objects.all()}
         
-        thb_to_lak = rates.get('LAK', Decimal('1'))
-        thb_to_usd = rates.get('USD', Decimal('1'))
-        
-        # User snippet used hardcoded values, but let's use the actual rates for accuracy
-        # or fall back to their snippet values if rates don't exist.
+        # Explicit conversion to Decimal to prevent TypeError with floats
+        def to_decimal(val):
+            return Decimal(str(val)) if val is not None else Decimal(1)
+
+        thb_to_lak = to_decimal(rates.get('LAK', 1))
+        thb_to_usd = to_decimal(rates.get('USD', 1))
         
         self.subtotal_lak = self.subtotal_thb * thb_to_lak
         self.subtotal_usd = self.subtotal_thb * thb_to_usd
@@ -400,3 +401,112 @@ class OrderItem(models.Model):
         super().save(*args, **kwargs)
         # ອັບເດດຍອດລວມຂອງບິນ
         self.order.calculate_totals()
+
+
+
+
+class Quotation(models.Model):
+    """ໃບສະເໜີລາຄາ (Quotation)"""
+    
+    STATUS_CHOICES = (
+        ('DRAFT', 'ຮ່າງ (Draft)'),
+        ('SENT', 'ສົ່ງແລ້ວ (Sent)'),
+        ('ACCEPTED', 'ລູກຄ້າຕົກລົງ (Accepted)'),
+        ('REJECTED', 'ປະຕິເສດ (Rejected)'),
+        ('CONVERTED', 'ສ້າງບິນແລ້ວ (Converted)'),
+    )
+    
+    # ຂໍ້ມູນໃບສະເໜີລາຄາ
+    quotation_no = models.CharField(max_length=50, unique=True, verbose_name="ເລກທີໃບສະເໜີລາຄາ")
+    date = models.DateField(default=timezone.now, verbose_name="ວັນທີ")
+    valid_until = models.DateField(null=True, blank=True, verbose_name="ໃຊ້ໄດ້ເຖິງວັນທີ")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT', verbose_name="ສະຖານະ")
+    
+    # ຂໍ້ມູນລູກຄ້າ
+    customer_name = models.CharField(max_length=200, verbose_name="ຊື່ລູກຄ້າ", blank=True, null=True)
+    customer_phone = models.CharField(max_length=50, verbose_name="ເບີໂທລະສັບລູກຄ້າ", blank=True, null=True)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ລູກຄ້າ")
+    
+    # ຂໍ້ມູນລົດ
+    car_register_no = models.CharField(max_length=100, verbose_name="ທະບຽນລົດ", blank=True, null=True)
+    car_brand = models.CharField(max_length=100, verbose_name="ຍີ່ຫໍ້ລົດ", blank=True, null=True)
+    car_model = models.CharField(max_length=100, verbose_name="ແບບລົດ", blank=True, null=True)
+    car_mileage = models.CharField(max_length=50, verbose_name="ເລກ km", blank=True, null=True)
+    
+    # ຍອດລວມ (Subtotal)
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name="ຍອດລວມ")
+    discount = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name="ສ່ວນຫຼຸດ")
+    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name="ອາກອນ")
+    net_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name="ຍອດລວມສຸດທິ")
+    
+    # System Info
+    remarks = models.TextField(blank=True, null=True, verbose_name="ໝາຍເຫດ")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name="ຜູ້ອອກໃບ")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="ສ້າງເມື່ອ")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="ອັບເດດເມື່ອ")
+    
+    class Meta:
+        ordering = ['-date', '-created_at']
+        verbose_name = "ໃບສະເໜີລາຄາ"
+        verbose_name_plural = "ໃບສະເໜີລາຄາທັງໝົດ"
+    
+    def __str__(self):
+        return f"{self.quotation_no} - {self.customer_name}"
+    
+    def calculate_totals(self):
+        """ຄິດໄລ່ຍອດລວມທັງໝົດ"""
+        items = self.items.all()
+        self.subtotal = sum(item.amount for item in items)
+        self.net_amount = self.subtotal - self.discount + self.tax_amount
+        self.save()
+    
+    def generate_quotation_no(self):
+        """ສ້າງເລກທີບິນອັດຕະໂນມັດ QT-YYMMDD-XXXXX"""
+        if not self.quotation_no:
+            year = self.date.strftime('%y')
+            month_day = self.date.strftime('%m%d')
+            prefix = f'QT{year}{month_day}'
+            
+            last_q = Quotation.objects.filter(quotation_no__startswith=prefix).order_by('-quotation_no').first()
+            if last_q:
+                try:
+                    last_num = int(last_q.quotation_no.split('-')[1])
+                    new_num = last_num + 1
+                except:
+                    new_num = 1
+            else:
+                new_num = 1
+                
+            self.quotation_no = f"{prefix}-{str(new_num).zfill(5)}"
+    
+    def save(self, *args, **kwargs):
+        if not self.quotation_no:
+            self.generate_quotation_no()
+        super().save(*args, **kwargs)
+
+
+class QuotationItem(models.Model):
+    """ລາຍການໃນໃບສະເໜີລາຄາ"""
+    
+    quotation = models.ForeignKey(
+        Quotation, 
+        on_delete=models.CASCADE, 
+        related_name='items',
+        verbose_name="ໃບສະເໜີລາຄາ"
+    )
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    item_no = models.IntegerField(verbose_name="ລຳດັບ", default=1)
+    description = models.TextField(verbose_name="ລາຍການ")
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1, verbose_name="ຈຳນວນ")
+    unit_price = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name="ລາຄາຕໍ່ໜ່ວຍ")
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name="ຈຳນວນເງິນລວມ")
+    
+    class Meta:
+        ordering = ['item_no']
+        verbose_name = "ລາຍການສະເໜີລາຄາ"
+        verbose_name_plural = "ລາຍການສະເໜີລາຄາ"
+    
+    def save(self, *args, **kwargs):
+        self.amount = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+        self.quotation.calculate_totals()

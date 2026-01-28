@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}ລາຍລະອຽດໃບສະເໜີລາຄາ {{ quotation.quotation_no }} | K-Auto{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-8xl">
+        
+        <!-- Actions Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 print:hidden">
+            <a href="{% url 'quotation_list' %}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="fas fa-arrow-left"></i> ກັບຄືນ
+            </a>
+            
+            <div class="flex flex-wrap gap-2">
+                <!-- WhatsApp Share -->
+                <a href="https://wa.me/?text={{ whatsapp_text }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium rounded-lg shadow-sm transition-colors">
+                    <i class="fab fa-whatsapp mr-2 text-lg"></i> Send via WhatsApp
+                </a>
+                
+                <!-- Convert to Order -->
+                {% if quotation.status != 'CONVERTED' %}
+                <form action="{% url 'quotation_to_order' quotation.pk %}" method="POST" onsubmit="return confirm('ຢືນຢັນການປ່ຽນເປັນບິນຂາຍ?');">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition-colors">
+                        <i class="fas fa-exchange-alt mr-2"></i> ປ່ຽນເປັນບິນຂາຍ
+                    </button>
+                </form>
+                {% endif %}
+                
+                <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg shadow-sm transition-colors">
+                    <i class="fas fa-print mr-2"></i> ພິມ
+                </button>
+                
+                {% if quotation.status != 'CONVERTED' %}
+                <!-- <a href="#" class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium rounded-lg shadow-sm transition-colors">
+                    <i class="fas fa-edit mr-2"></i> ແກ້ໄຂ
+                </a> --> 
+                <!-- Edit not implemented in View yet -->
+                
+                <a href="{% url 'quotation_delete' quotation.pk %}" onclick="return confirm('ຕ້ອງການລຶບແທ້ບໍ່?')" class="inline-flex items-center px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 font-medium rounded-lg shadow-sm transition-colors">
+                    <i class="fas fa-trash-alt mr-2"></i> ລຶບ
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quotation Paper -->
+        <div class="rounded-lg shadow-lg overflow-hidden print:shadow-none print:border print:border-gray-200" id="printArea">
+            
+            <!-- Branding -->
+            <div class="p-8 border-b border-gray-200 flex justify-between items-start">
+                <div class="flex items-center gap-4">
+                    {% load static %}
+                    <img src="{% static 'images/k-auto-logo.JPG' %}" alt="Logo" class="h-16 w-auto rounded-lg">
+                    <div>
+                        <h1 class="text-2xl font-bold uppercase tracking-wider">ໃບສະເໜີລາຄາ</h1>
+                        <h2 class="text-sm font-semibold text-gray-500 uppercase">Quotation</h2>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xl font-bold">{{ quotation.quotation_no }}</p>
+                    <p class="text-sm text-gray-500">ວັນທີ: {{ quotation.date|date:"d/m/Y" }}</p>
+                    <p class="text-sm text-gray-500">ສະຖານະ: <span class="uppercase font-bold">{{ quotation.get_status_display }}</span></p>
+                </div>
+            </div>
+
+            <!-- Customer & Car -->
+            <div class="grid grid-cols-2 gap-8 p-8 border-b border-gray-200 bg-gray-50">
+                <div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">ລູກຄ້າ (Customer)</h3>
+                    <p class="font-bold text-lg">{{ quotation.customer_name|default:"-" }}</p>
+                    <p class="text-gray-600 dark:text-gray-300">{{ quotation.customer_phone|default:"-" }}</p>
+                </div>
+                <div class="text-right">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">ຂໍ້ມູນລົດ (Vehicle Info)</h3>
+                    <p class=""><span class="font-medium">ທະບຽນ:</span> {{ quotation.car_register_no|default:"-" }}</p>
+                    <p class=""><span class="font-medium">ຍີ່ຫໍ້/ລຸ້ນ:</span> {{ quotation.car_brand }} {{ quotation.car_model }}</p>
+                    <p class=""><span class="font-medium">ກິໂລແມັດ:</span> {{ quotation.car_mileage|default:"-" }} km</p>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div class="p-8">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b-2 border-gray-100">
+                            <th class="py-3 text-sm font-bold text-gray-500 uppercase tracking-wider w-12">#</th>
+                            <th class="py-3 text-sm font-bold text-gray-500 uppercase tracking-wider">ລາຍການ (Description)</th>
+                            <th class="py-3 text-sm font-bold text-gray-500 uppercase tracking-wider text-center w-24">ຈຳນວນ</th>
+                            <th class="py-3 text-sm font-bold text-gray-500 uppercase tracking-wider text-right w-32">ລາຄາ/ໜ່ວຍ</th>
+                            <th class="py-3 text-sm font-bold text-gray-500 uppercase tracking-wider text-right w-32">ລວມ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                        {% for item in quotation.items.all %}
+                        <tr>
+                            <td class="py-4 text-gray-500">{{ item.item_no }}</td>
+                            <td class="py-4 font-medium text-gray-900 dark:text-white">{{ item.description }}</td>
+                            <td class="py-4 text-center text-gray-600 dark:text-gray-300">{{ item.quantity|floatformat:0 }}</td>
+                            <td class="py-4 text-right text-gray-600 dark:text-gray-300">{{ item.unit_price|intcomma }}</td>
+                            <td class="py-4 text-right font-bold text-gray-900 dark:text-white">{{ item.amount|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="p-8 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <div class="w-64 space-y-3">
+                    <div class="flex justify-between text-gray-600">
+                        <span>ຍອດລວມ (Subtotal)</span>
+                        <span class="font-medium">{{ quotation.subtotal|intcomma }}</span>
+                    </div>
+                    {% if quotation.discount > 0 %}
+                    <div class="flex justify-between text-green-600">
+                        <span>ສ່ວນຫຼຸດ (Discount)</span>
+                        <span class="font-medium">-{{ quotation.discount|intcomma }}</span>
+                    </div>
+                    {% endif %}
+                    {% if quotation.tax_amount > 0 %}
+                    <div class="flex justify-between text-gray-600">
+                        <span>ອາກອນ (Tax)</span>
+                        <span class="font-medium">{{ quotation.tax_amount|intcomma }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between text-xl font-bold text-blue-600 pt-3 border-t border-gray-200">
+                        <span>ລວມສຸດທິ (Total)</span>
+                        <span>{{ quotation.net_amount|intcomma }} ₭</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-8 border-t border-gray-200 text-center text-xs text-gray-400">
+                <p>Quotation generated by K-Auto System on {{ quotation.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printArea, #printArea * {
+            visibility: visible;
+        }
+        #printArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none;
+            border: none;
+        }
+    }
+</style>
+{% endblock %}

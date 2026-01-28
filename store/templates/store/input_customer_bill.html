@@ -9,9 +9,9 @@
     <!-- Branding Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b-4 border-red-600 gap-6">
         <div class="flex flex-col md:flex-row items-center gap-6">
-            <div class="bg-gradient-to-br from-red-600 to-red-700 text-white w-20 h-20 flex items-center justify-center rounded-2xl font-bold text-4xl shadow-lg border-2 border-white/20">K</div>
+
             <div class="text-center md:text-left">
-                <h2 class="text-2xl md:text-3xl font-extrabold text-red-600 mb-1 lg:tracking-tight">K AUTO LAO SERVICE</h2>
+                <img src="{% static 'images/k-auto-logo.JPG' %}" alt="K-Auto Logo" class="h-20 object-cover rounded-lg mb-2">
                 <p class="text-gray-500 font-medium text-sm">ວິສາຫະກິດສ່ວນບຸກຄົນອູ່ສ້ອມແປງລົດ ເຄເອໂຕ້ລາວ ເຊີວິສ</p>
                 <div class="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-1 mt-2 text-gray-400 text-xs">
                     <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-red-500"></i> ບ້ານນາເລົ່າ ເມືອງໄກສອນພົມວິຫານ ແຂວງສະຫວັນນະເຂດ</span>
@@ -109,7 +109,14 @@
                 </div>
                 <div class="lg:col-span-2 flex flex-col gap-1.5">
                     <label class="block text-sm font-bold text-gray-700">ພະນັກງານຂາຍ / Sales Rep.</label>
-                    <input type="text" id="sale_rep" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all font-bold text-gray-700" value="{{ request.user.username }}">
+                    <select id="sale_rep" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all font-bold text-gray-700 bg-white" onchange="syncReceivedBy()">
+                        <option value="{{ request.user.username }}">{{ request.user.username }}</option>
+                        {% for rep in sale_reps %}
+                        {% if rep != request.user.username %}
+                        <option value="{{ rep }}">{{ rep }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
         </div>
@@ -155,7 +162,14 @@
                 <div class="space-y-6">
                     <div class="space-y-1.5">
                         <label class="block text-sm font-bold text-gray-700">ຜູ້ຮັບເງິນ / Received By</label>
-                        <input type="text" id="received_by" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ຊື່ຜູ້ຮັບເງິນ">
+                        <select id="received_by" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all font-bold text-gray-700 bg-white">
+                            <option value="{{ request.user.username }}">{{ request.user.username }}</option>
+                            {% for rep in sale_reps %}
+                            {% if rep != request.user.username %}
+                            <option value="{{ rep }}">{{ rep }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-6">
@@ -172,7 +186,15 @@
                     <div class="grid grid-cols-2 gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-gray-700">ທະນາຄານ / Bank</label>
-                            <input type="text" id="bank_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="ຊື່ທະນາຄານ">
+                            <select id="bank_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white">
+                                <option value="">-- ເລືອກທະນາຄານ --</option>
+                                <option value="ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ (BCEL)">ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ (BCEL)</option>
+                                <option value="ທະນາຄານ ສົ່ງເສີມກະສິກຳ (APB)">ທະນາຄານ ສົ່ງເສີມກະສິກຳ (APB)</option>
+                                <option value="ທະນາຄານ ພັດທະນາລາວ (LDB)">ທະນາຄານ ພັດທະນາລາວ (LDB)</option>
+                                <option value="ທະນາຄານ ຮ່ວມພັດທະນາ (JDB)">ທະນາຄານ ຮ່ວມພັດທະນາ (JDB)</option>
+                                <option value="ທະນາຄານ ພົງສະຫວັນ (Phongsavanh Bank)">ທະນາຄານ ພົງສະຫວັນ (Phongsavanh Bank)</option>
+                                <option value="ທະນາຄານ ອິນໂດຈີນ (Indochina Bank)">ທະນາຄານ ອິນໂດຈີນ (Indochina Bank)</option>
+                            </select>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-gray-700">ສາຂາ / Branch</label>
@@ -350,7 +372,14 @@
         document.getElementById('car_color').value = c.car_color || '';
 
         document.getElementById('mechanic_name').value = c.mechanic_name || '';
-        document.getElementById('sale_rep').value = c.sale_representative || '';
+
+        // Set sale_rep if customer has a saved value
+        if (c.sale_representative) {
+            document.getElementById('sale_rep').value = c.sale_representative;
+        }
+
+        // Sync received_by with sale_rep
+        syncReceivedBy();
 
         custResult.style.display = 'none';
     }
@@ -534,6 +563,12 @@
         document.getElementById('cash_check').checked = cash > 0;
         document.getElementById('check_check').checked = check > 0;
         document.getElementById('credit_check').checked = credit > 0;
+    }
+
+    // Sync Received By with Sales Rep
+    function syncReceivedBy() {
+        const saleRepValue = document.getElementById('sale_rep').value;
+        document.getElementById('received_by').value = saleRepValue;
     }
 
     // Initialize one row

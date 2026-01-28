@@ -1,4 +1,4 @@
-from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer, Category
+from .models import Product, Transaction, Brand, Order, OrderItem, CurrencyRate, Customer, Category, Quotation, QuotationItem
 from django.db import transaction as db_transaction
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
@@ -190,23 +190,23 @@ def dashboard_view(request):
     # 1. ດຶງວັນທີປະຈຸບັນ
     today = timezone.now().date()
 
-    # 2. ຄິດໄລ່ຍອດຂາຍວັນນີ້ (ສະເພາະຂາອອກ 'OUT')
+    # 2. ຄິດໄລ່ຍອດຂາຍວັນນີ້ (ຈາກ Order.subtotal_thb)
     daily_sales = (
-        Transaction.objects.filter(
-            transaction_type="OUT", created_at__date=today
-        ).aggregate(Sum("total_value"))["total_value__sum"]
+        Order.objects.filter(date=today).aggregate(Sum("subtotal_thb"))["subtotal_thb__sum"]
         or 0
     )
 
     # 3. ນັບຈຳນວນບິນວັນນີ້
-    daily_orders = Transaction.objects.filter(
-        transaction_type="OUT", created_at__date=today
-    ).count()
+    daily_orders = Order.objects.filter(date=today).count()
+    
+    # 4. ນັບສິນຄ້າທັງໝົດ ແລະ ສິນຄ້າໃກ້ໝົດ
+    product_count = Product.objects.count()
+    low_stock_count = Product.objects.filter(quantity__lte=5).count()
 
-    # 4. ດຶງຂໍ້ມູນ 5 ລາຍການລ່າສຸດມາສະແດງ
-    recent_transactions = Transaction.objects.all().order_by("-created_at")[:5]
+    # 5. ດຶງຂໍ້ມູນ 5 ລາຍການລ່າສຸດມາສະແດງ (Orders)
+    recent_orders = Order.objects.all().order_by("-id")[:5]
 
-    # 5. ກຽມຂໍ້ມູນກຣາຟ (ຍອດຂາຍ 7 ມື້ຍ້ອນຫຼັງ)
+    # 6. ກຽມຂໍ້ມູນກຣາຟ (ຍອດຂາຍ 7 ມື້ຍ້ອນຫຼັງ)
     dates = []
     sales_data = []
 
@@ -214,9 +214,7 @@ def dashboard_view(request):
         date = today - timedelta(days=i)
         # ຄິດໄລ່ຍອດຂາຍຂອງມື້ນັ້ນ
         sales = (
-            Transaction.objects.filter(
-                transaction_type="OUT", created_at__date=date
-            ).aggregate(Sum("total_value"))["total_value__sum"]
+            Order.objects.filter(date=date).aggregate(Sum("subtotal_thb"))["subtotal_thb__sum"]
             or 0
         )
 
@@ -226,7 +224,9 @@ def dashboard_view(request):
     context = {
         "daily_sales": daily_sales,
         "daily_orders": daily_orders,
-        "recent_transactions": recent_transactions,
+        "product_count": product_count,
+        "low_stock_count": low_stock_count,
+        "recent_orders": recent_orders,
         "dates": dates,  # ສົ່ງໄປເຮັດແກນ X ຂອງກຣາຟ
         "sales_data": sales_data,  # ສົ່ງໄປເຮັດແກນ Y ຂອງກຣາຟ
     }
@@ -655,9 +655,17 @@ def input_bill_view(request):
         rate_lak = 0.0
         rate_usd = 1.0
 
+    # Get unique sale representatives from Customer model
+    sale_reps = Customer.objects.filter(
+        sale_representative__isnull=False
+    ).exclude(
+        sale_representative=''
+    ).values_list('sale_representative', flat=True).distinct().order_by('sale_representative')
+
     context = {
         'rate_lak': rate_lak,
-        'rate_usd': rate_usd
+        'rate_usd': rate_usd,
+        'sale_reps': list(sale_reps)
     }
     return render(request, "store/input_customer_bill.html", context)
 
@@ -1032,3 +1040,174 @@ def order_api_detail(request, invoice_no):
     }
     
     return JsonResponse(data)
+
+# -----------------------------------------------------------
+# Quotation System Views
+# -----------------------------------------------------------
+
+@login_required
+def quotation_list(request):
+    """List all quotations"""
+    status = request.GET.get('status')
+    search_query = request.GET.get('search')
+    
+    quotations = Quotation.objects.all()
+    
+    if status:
+        quotations = quotations.filter(status=status)
+        
+    if search_query:
+        quotations = quotations.filter(
+            Q(quotation_no__icontains=search_query) |
+            Q(customer_name__icontains=search_query) |
+            Q(car_register_no__icontains=search_query)
+        )
+        
+    context = {
+        'quotations': quotations,
+        'current_status': status,
+    }
+    return render(request, 'store/quotation_list.html', context)
+
+@login_required
+def quotation_create(request):
+    """Create a new quotation"""
+    if request.method == 'POST':
+        # Get Customer Info
+        customer_id = request.POST.get('customer')
+        customer_name = request.POST.get('customer_name')
+        customer_phone = request.POST.get('customer_phone')
+        
+        # Get Car Info
+        car_register_no = request.POST.get('car_register_no')
+        car_brand = request.POST.get('car_brand')
+        car_model = request.POST.get('car_model')
+        car_mileage = request.POST.get('car_mileage')
+        
+        # Create Quotation
+        quotation = Quotation.objects.create(
+            date=timezone.now().date(),
+            customer_id=customer_id if customer_id else None,
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            car_register_no=car_register_no,
+            car_brand=car_brand,
+            car_model=car_model,
+            car_mileage=car_mileage,
+            user=request.user,
+            status='DRAFT'
+        )
+        
+        # Add Items
+        descriptions = request.POST.getlist('item_description[]')
+        quantities = request.POST.getlist('item_quantity[]')
+        unit_prices = request.POST.getlist('item_unit_price[]')
+        product_ids = request.POST.getlist('item_product_id[]') # Optional
+        
+        for i in range(len(descriptions)):
+            if descriptions[i]:
+                # Convert to Decimal to avoid TypeError during multiplication in model.save()
+                qty = Decimal(quantities[i]) if quantities[i] else Decimal('1')
+                price = Decimal(unit_prices[i]) if unit_prices[i] else Decimal('0')
+                
+                QuotationItem.objects.create(
+                    quotation=quotation,
+                    item_no=i+1,
+                    description=descriptions[i],
+                    quantity=qty,
+                    unit_price=price,
+                    product_id=product_ids[i] if product_ids[i] else None
+                )
+        
+        quotation.calculate_totals()
+        messages.success(request, f"ສ້າງໃບສະເໜີລາຄາ {quotation.quotation_no} ສຳເລັດ!")
+        return redirect('quotation_detail', pk=quotation.pk)
+
+    # Get Products for Autocomplete
+    products = Product.objects.all()
+    customers = Customer.objects.all()
+    
+    context = {
+        'products': products,
+        'customers': customers,
+    }
+    return render(request, 'store/quotation_form.html', context)
+
+@login_required
+def quotation_detail(request, pk):
+    """View quotation details"""
+    quotation = get_object_or_404(Quotation, pk=pk)
+    
+    # WhatsApp Text Generator
+    from urllib.parse import quote
+    wa_text = f"📄 *ໃບສະເໜີລາຄາ (Quotation)*%0A"
+    wa_text += f"ເລກທີ: {quotation.quotation_no}%0A"
+    wa_text += f"ວັນທີ: {quotation.date.strftime('%d/%m/%Y')}%0A"
+    wa_text += f"ລູກຄ້າ: {quotation.customer_name or 'ທົ່ວໄປ'}%0A"
+    wa_text += "━━━━━━━━━━━━━━━━━━%0A"
+    
+    for item in quotation.items.all():
+        wa_text += f"- {item.description} ({item.quantity:g} x {item.unit_price:,.0f}) = {item.amount:,.0f}%0A"
+        
+    wa_text += "━━━━━━━━━━━━━━━━━━%0A"
+    wa_text += f"💰 *ຍອດລວມ: {quotation.net_amount:,.0f} ₭*"
+    
+    context = {
+        'quotation': quotation,
+        'whatsapp_text': quote(wa_text),
+    }
+    return render(request, 'store/quotation_detail.html', context)
+
+@login_required
+def quotation_delete(request, pk):
+    quotation = get_object_or_404(Quotation, pk=pk)
+    if quotation.status != 'CONVERTED':
+        quotation.delete()
+        messages.success(request, "ລຶບໃບສະເໜີລາຄາສຳເລັດ")
+    else:
+        messages.error(request, "ບໍ່ສາມາດລຶບໃບສະເໜີລາຄາທີ່ສ້າງບິນແລ້ວໄດ້")
+    return redirect('quotation_list')
+
+@login_required
+def quotation_to_order(request, pk):
+    """Convert Quotation to Order"""
+    quotation = get_object_or_404(Quotation, pk=pk)
+    
+    if quotation.status == 'CONVERTED':
+        messages.warning(request, "ໃບສະເໜີລາຄານີ້ຖືກສ້າງບິນໄປແລ້ວ")
+        return redirect('quotation_detail', pk=pk)
+        
+    # Create Order
+    order = Order.objects.create(
+        date=timezone.now().date(),
+        customer=quotation.customer,
+        customer_name=quotation.customer_name,
+        customer_phone=quotation.customer_phone,
+        car_register_no=quotation.car_register_no,
+        car_brand=quotation.car_brand,
+        car_model=quotation.car_model,
+        car_mileage=quotation.car_mileage,
+        user=request.user,
+        remarks=f"Converted from Quotation {quotation.quotation_no}"
+    )
+    
+    # Copy Items
+    for q_item in quotation.items.all():
+        OrderItem.objects.create(
+            order=order,
+            item_no=q_item.item_no,
+            product=q_item.product,
+            description=q_item.description,
+            quantity=q_item.quantity,
+            unit_price=q_item.unit_price,
+            amount=q_item.amount
+        )
+        
+    order.calculate_totals()
+    
+    # Update Quotation Status
+    quotation.status = 'CONVERTED'
+    quotation.save()
+
+    messages.success(request, f"ສ້າງບິນຂາຍ {order.invoice_no} ຈາກໃບສະເໜີລາຄາສຳເລັດ!")
+    return redirect('order_detail', invoice_no=order.invoice_no)
