@@ -22,6 +22,7 @@ urlpatterns = [
     path("api/orders/", views.order_api_list, name="order_api_list"),
     path("api/orders/<str:invoice_no>/", views.order_api_detail, name="order_api_detail"),
     path("api/save-customer/", views.api_save_customer, name="api_save_customer"),
+    path("api/search-products/", views.search_products, name="search_products"),
 
     # Bill/Invoice Management
     path("input-bill/", views.input_bill_view, name="input-bill"),

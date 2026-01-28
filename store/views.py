@@ -1170,44 +1170,63 @@ def quotation_delete(request, pk):
 
 @login_required
 def quotation_to_order(request, pk):
-    """Convert Quotation to Order"""
     quotation = get_object_or_404(Quotation, pk=pk)
     
     if quotation.status == 'CONVERTED':
         messages.warning(request, "ໃບສະເໜີລາຄານີ້ຖືກສ້າງບິນໄປແລ້ວ")
         return redirect('quotation_detail', pk=pk)
         
-    # Create Order
+    # Create Order from Quotation
     order = Order.objects.create(
-        date=timezone.now().date(),
-        customer=quotation.customer,
         customer_name=quotation.customer_name,
         customer_phone=quotation.customer_phone,
+        customer=quotation.customer,
         car_register_no=quotation.car_register_no,
         car_brand=quotation.car_brand,
         car_model=quotation.car_model,
         car_mileage=quotation.car_mileage,
         user=request.user,
-        remarks=f"Converted from Quotation {quotation.quotation_no}"
+        remarks=f"Converted from Quotation {quotation.quotation_no}. {quotation.remarks or ''}"
     )
     
     # Copy Items
     for q_item in quotation.items.all():
         OrderItem.objects.create(
             order=order,
-            item_no=q_item.item_no,
             product=q_item.product,
             description=q_item.description,
             quantity=q_item.quantity,
             unit_price=q_item.unit_price,
             amount=q_item.amount
         )
-        
+    
+    # Update Totals
     order.calculate_totals()
     
     # Update Quotation Status
     quotation.status = 'CONVERTED'
     quotation.save()
+    
+    messages.success(request, f"Created Order {order.invoice_no} from Quotation {quotation.quotation_no}")
+    return redirect('order_detail', pk=order.pk)
 
-    messages.success(request, f"ສ້າງບິນຂາຍ {order.invoice_no} ຈາກໃບສະເໜີລາຄາສຳເລັດ!")
-    return redirect('order_detail', invoice_no=order.invoice_no)
+@login_required
+def search_products(request):
+    """API URL for autocomplete product search"""
+    term = request.GET.get('term', '')
+    products = Product.objects.filter(
+        Q(name__icontains=term) | 
+        Q(barcode__icontains=term)
+    )[:10]  # Limit to 10 results
+    
+    results = []
+    for p in products:
+        results.append({
+            'id': p.id,
+            'label': f"{p.name} ({p.sell_price:,.0f})",
+            'value': p.name,
+            'price': float(p.sell_price),
+            'barcode': p.barcode
+        })
+    
+    return JsonResponse(results, safe=False)

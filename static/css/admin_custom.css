@@ -1,0 +1,9 @@
+/* Custom Admin Styles */
+
+/* Fix Logo Size on Login Page */
+.login-box .brand-logo img {
+  max-width: 150px; /* Constrain width */
+  height: auto; /* Maintain aspect ratio */
+  margin: 0 auto; /* Center it */
+  display: block;
+}

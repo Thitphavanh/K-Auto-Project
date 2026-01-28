@@ -4,8 +4,8 @@
 {% block title %}{% if is_update %}ແກ້ໄຂໃບສະເໜີລາຄາ{% else %}ສ້າງໃບສະເໜີລາຄາ{% endif %} - K-Auto{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-    <div class="container mx-auto px-4 max-w-5xl">
+<div class="min-h-screen">
+    <div class="container mx-auto px-4 max-w-8xl">
         <form method="POST">
             {% csrf_token %}
             
@@ -16,7 +16,7 @@
                         <i class="fas fa-arrow-left text-xl"></i>
                     </a>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
+                        <h1 class="text-2xl font-bold">
                             {% if is_update %}
                                 📝 ແກ້ໄຂໃບສະເໜີລາຄາ {{ quotation.quotation_no }}
                             {% else %}
@@ -35,52 +35,52 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Customer Info -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 border-l-4 border-blue-500 pl-3">
+                <div class="rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 border-l-4 border-blue-500 pl-3">
                         ຂໍ້ມູນລູກຄ້າ (Customer)
                     </h3>
                     <div class="space-y-4">
                          <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ຊື່ລູກຄ້າ *</label>
-                            <input type="text" name="customer_name" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500" value="{{ quotation.customer_name|default:'' }}" required placeholder="ຊື່ລູກຄ້າ...">
+                            <label class="block text-sm font-medium mb-1">ຊື່ລູກຄ້າ *</label>
+                            <input type="text" name="customer_name" class="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500" value="{{ quotation.customer_name|default:'' }}" required placeholder="ຊື່ລູກຄ້າ...">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ເບີໂທ</label>
-                            <input type="text" name="customer_phone" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500" value="{{ quotation.customer_phone|default:'' }}" placeholder="ເບີໂທຕິດຕໍ່...">
+                            <label class="block text-sm font-medium mb-1">ເບີໂທ</label>
+                            <input type="text" name="customer_phone" class="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500" value="{{ quotation.customer_phone|default:'' }}" placeholder="ເບີໂທຕິດຕໍ່...">
                         </div>
                     </div>
                 </div>
 
                 <!-- Car Info -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 border-l-4 border-purple-500 pl-3">
+                <div class="rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 border-l-4 border-purple-500 pl-3">
                         ຂໍ້ມູນລົດ (Vehicle)
                     </h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ທະບຽນລົດ</label>
-                            <input type="text" name="car_register_no" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" value="{{ quotation.car_register_no|default:'' }}">
+                            <label class="block text-sm font-medium mb-1">ທະບຽນລົດ</label>
+                            <input type="text" name="car_register_no" class="w-full rounded-lg border-gray-300 dark:border-gray-600" value="{{ quotation.car_register_no|default:'' }}" placeholder="ທະບຽນລົດ...">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ຍີ່ຫໍ້</label>
-                            <input type="text" name="car_brand" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" value="{{ quotation.car_brand|default:'' }}">
+                            <label class="block text-sm font-medium mb-1">ຍີ່ຫໍ້</label>
+                            <input type="text" name="car_brand" class="w-full rounded-lg border-gray-300 dark:border-gray-600" value="{{ quotation.car_brand|default:'' }}" placeholder="ຍີ່ຫໍ້...">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ລຸ້ນ (Model)</label>
-                            <input type="text" name="car_model" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" value="{{ quotation.car_model|default:'' }}">
+                            <label class="block text-sm font-medium mb-1">ລຸ້ນ (Model)</label>
+                            <input type="text" name="car_model" class="w-full rounded-lg border-gray-300 dark:border-gray-600" value="{{ quotation.car_model|default:'' }}" placeholder="ລຸ້ນ (Model)...">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ເລກກິໂລ (Km)</label>
-                            <input type="text" name="car_mileage" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" value="{{ quotation.car_mileage|default:'' }}">
+                            <label class="block text-sm font-medium mb-1">ເລກກິໂລ (Km)</label>
+                            <input type="text" name="car_mileage" class="w-full rounded-lg border-gray-300 dark:border-gray-600" value="{{ quotation.car_mileage|default:'' }}" placeholder="ເລກກິໂລ (Km)...">
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Items -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-6">
+            <div class="rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white border-l-4 border-green-500 pl-3">
+                    <h3 class="text-lg font-bold border-l-4 border-green-500 pl-3">
                         ລາຍການສິນຄ້າ/ບໍລິການ
                     </h3>
                     <button type="button" id="addRow" class="px-3 py-1.5 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-sm font-medium transition-colors">
@@ -92,7 +92,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="itemsTable">
                         <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-500 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600">
+                            <tr class="bg-gray-50 text-xs uppercase border-b border-gray-200 dark:border-gray-600">
                                 <th class="p-3 w-12 text-center">#</th>
                                 <th class="p-3">ລາຍການ (Description)</th>
                                 <th class="p-3 w-24 text-center">ຈຳນວນ</th>
@@ -108,16 +108,16 @@
                                 <tr>
                                     <td class="p-3 text-center text-gray-500">{{ forloop.counter }}</td>
                                     <td class="p-3">
-                                        <input type="text" name="item_description[]" value="{{ item.description }}" class="w-full rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5 focus:ring-1 focus:ring-blue-500" required>
+                                        <input type="text" name="item_description[]" value="{{ item.description }}" class="w-full rounded border-gray-200 dark:border-gray-600 p-1.5 focus:ring-1 focus:ring-blue-500" required>
                                         <input type="hidden" name="item_product_id[]" value="{{ item.product.id|default:'' }}">
                                     </td>
                                     <td class="p-3">
-                                        <input type="number" step="any" name="item_quantity[]" value="{{ item.quantity|floatformat:0 }}" class="qty-input w-full text-center rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5" min="1">
+                                        <input type="number" step="any" name="item_quantity[]" value="{{ item.quantity|floatformat:0 }}" class="qty-input w-full text-center rounded border-gray-200 dark:border-gray-600 p-1.5" min="1">
                                     </td>
                                     <td class="p-3">
-                                        <input type="number" step="any" name="item_unit_price[]" value="{{ item.unit_price|floatformat:0 }}" class="price-input w-full text-right rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5">
+                                        <input type="number" step="any" name="item_unit_price[]" value="{{ item.unit_price|floatformat:0 }}" class="price-input w-full text-right rounded border-gray-200 dark:border-gray-600 p-1.5">
                                     </td>
-                                    <td class="p-3 text-right font-medium text-gray-900 dark:text-white row-total">
+                                    <td class="p-3 text-right font-medium text-gray-900 row-total">
                                         {{ item.amount|floatformat:0 }}
                                     </td>
                                     <td class="p-3 text-center">
@@ -129,16 +129,16 @@
                                 <tr>
                                     <td class="p-3 text-center text-gray-500">1</td>
                                     <td class="p-3">
-                                        <input type="text" name="item_description[]" class="w-full rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5 focus:ring-1 focus:ring-blue-500" required placeholder="ຊື່ອາໄຫຼ່ ຫຼື ຄ່າແຮງງານ...">
+                                        <input type="text" name="item_description[]" class="w-full rounded border-gray-200 dark:border-gray-600 p-1.5 focus:ring-1 focus:ring-blue-500" required placeholder="ຊື່ອາໄຫຼ່ ຫຼື ຄ່າແຮງງານ...">
                                         <input type="hidden" name="item_product_id[]" value="">
                                     </td>
                                     <td class="p-3">
-                                        <input type="number" step="any" name="item_quantity[]" value="1" class="qty-input w-full text-center rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5" min="1">
+                                        <input type="number" step="any" name="item_quantity[]" value="1" class="qty-input w-full text-center rounded border-gray-200 dark:border-gray-600 p-1.5" min="1">
                                     </td>
                                     <td class="p-3">
-                                        <input type="number" step="any" name="item_unit_price[]" value="0" class="price-input w-full text-right rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5">
+                                        <input type="number" step="any" name="item_unit_price[]" value="0" class="price-input w-full text-right rounded border-gray-200 dark:border-gray-600 p-1.5">
                                     </td>
-                                    <td class="p-3 text-right font-medium text-gray-900 dark:text-white row-total">0</td>
+                                    <td class="p-3 text-right font-medium text-gray-900 row-total">0</td>
                                     <td class="p-3 text-center">
                                         <button type="button" class="remove-row text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
                                     </td>
@@ -166,39 +166,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const addRowBtn = document.getElementById('addRow');
     const grandTotalEl = document.getElementById('grandTotal');
     
-    // --- Autocomplete Logic ---
+    // --- Autocomplete Logic for Customer ---
     const customerInput = document.getElementsByName('customer_name')[0];
     const customerIdInput = document.createElement('input');
     customerIdInput.type = 'hidden';
     customerIdInput.name = 'customer';
     customerInput.parentNode.appendChild(customerIdInput);
     
-    // Create Results Dropdown
-    const resultsList = document.createElement('ul');
-    resultsList.className = 'absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto';
+    // Create Customer Results Dropdown
+    const customerResultsList = document.createElement('ul');
+    customerResultsList.className = 'absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto';
     customerInput.parentNode.style.position = 'relative';
-    customerInput.parentNode.appendChild(resultsList);
+    customerInput.parentNode.appendChild(customerResultsList);
     
-    let debounceTimer;
+    let customerDebounceTimer;
     
     customerInput.addEventListener('input', function() {
-        clearTimeout(debounceTimer);
+        clearTimeout(customerDebounceTimer);
         const query = this.value.trim();
         
         if (query.length < 2) {
-            resultsList.classList.add('hidden');
+            customerResultsList.classList.add('hidden');
             return;
         }
         
-        debounceTimer = setTimeout(() => {
+        customerDebounceTimer = setTimeout(() => {
             fetch(`/api/search-customer/?q=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    resultsList.innerHTML = '';
+                    customerResultsList.innerHTML = '';
                     if (data.results && data.results.length > 0) {
                         data.results.forEach(customer => {
                             const li = document.createElement('li');
-                            li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm';
+                            li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-0';
                             li.textContent = `${customer.name} (${customer.phone || '-'})`;
                             
                             li.addEventListener('click', () => {
@@ -212,27 +212,28 @@ document.addEventListener('DOMContentLoaded', function() {
                                 document.getElementsByName('car_model')[0].value = customer.car_model || '';
                                 document.getElementsByName('car_mileage')[0].value = customer.car_mileage || '';
                                 
-                                resultsList.classList.add('hidden');
+                                customerResultsList.classList.add('hidden');
                             });
                             
-                            resultsList.appendChild(li);
+                            customerResultsList.appendChild(li);
                         });
-                        resultsList.classList.remove('hidden');
+                        customerResultsList.classList.remove('hidden');
                     } else {
-                        resultsList.classList.add('hidden');
+                        customerResultsList.classList.add('hidden');
                     }
                 })
                 .catch(err => console.error('Error fetching customers:', err));
         }, 300);
     });
     
-    // Hide dropdown when clicking outside
+    // Hide customer dropdown when clicking outside
     document.addEventListener('click', function(e) {
-        if (!customerInput.contains(e.target) && !resultsList.contains(e.target)) {
-            resultsList.classList.add('hidden');
+        if (!customerInput.contains(e.target) && !customerResultsList.contains(e.target)) {
+            customerResultsList.classList.add('hidden');
         }
     });
 
+    // --- Helper Functions ---
     function formatNumber(num) {
         return num.toLocaleString('en-US');
     }
@@ -253,11 +254,98 @@ document.addEventListener('DOMContentLoaded', function() {
         grandTotalEl.textContent = formatNumber(total) + ' ₭';
     }
 
+    // --- Product Autocomplete Logic ---
+    function attachProductAutocomplete(row) {
+        const descInput = row.querySelector('input[name="item_description[]"]');
+        const productIdInput = row.querySelector('input[name="item_product_id[]"]');
+        const qtyInput = row.querySelector('.qty-input');
+        const priceInput = row.querySelector('.price-input');
+        
+        // Ensure parent positioning
+        descInput.parentNode.style.position = 'relative';
+
+        // Check if dropdown already exists to avoid duplicates
+        if (descInput.parentNode.querySelector('.product-results')) {
+            return; 
+        }
+
+        // Create product results dropdown
+        const resultsDiv = document.createElement('div');
+        resultsDiv.className = 'product-results absolute z-50 w-full bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto';
+        descInput.parentNode.appendChild(resultsDiv);
+
+        let debounceTimer;
+
+        descInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                resultsDiv.classList.add('hidden');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                // Call search_products API (using 'term' as per Select2 convention/API view)
+                fetch(`/api/search-products/?term=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultsDiv.innerHTML = '';
+                        if (data && data.length > 0) {
+                            data.forEach(product => {
+                                const div = document.createElement('div');
+                                div.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0';
+                                div.innerHTML = `
+                                    <div class="font-medium text-gray-900">${product.value}</div>
+                                    <div class="text-xs text-gray-500">
+                                        ລະຫັດ: ${product.barcode} | ລາຄາ: ${formatNumber(product.price)} ₭
+                                    </div>
+                                `;
+
+                                div.addEventListener('click', () => {
+                                    descInput.value = product.value;
+                                    productIdInput.value = product.id;
+                                    priceInput.value = product.price;
+
+                                    resultsDiv.classList.add('hidden');
+                                    calculateRow(row); // Update row total immediately
+                                    calculateGrandTotal();
+
+                                    // Focus on quantity for seamless workflow
+                                    qtyInput.focus();
+                                    qtyInput.select();
+                                });
+
+                                resultsDiv.appendChild(div);
+                            });
+                            resultsDiv.classList.remove('hidden');
+                        } else {
+                            resultsDiv.classList.add('hidden');
+                        }
+                    })
+                    .catch(err => console.error('Error fetching products:', err));
+            }, 300);
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!descInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.add('hidden');
+            }
+        });
+    }
+
     function attachListeners(row) {
         row.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', calculateGrandTotal);
+            input.addEventListener('input', () => {
+                calculateRow(row);
+                calculateGrandTotal();
+            });
         });
-        
+
+        const removeBtn = row.querySelector('.remove-row');
+        // Prevent multiple listeners
+        removeBtn.replaceWith(removeBtn.cloneNode(true));
         row.querySelector('.remove-row').addEventListener('click', function() {
             if (tableBody.querySelectorAll('tr').length > 1) {
                 row.remove();
@@ -265,6 +353,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 calculateGrandTotal();
             }
         });
+
+        // Add autocomplete for description field
+        attachProductAutocomplete(row);
     }
 
     function updateRowNumbers() {
@@ -277,17 +368,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td class="p-3 text-center text-gray-500"></td>
-            <td class="p-3">
-                <input type="text" name="item_description[]" class="w-full rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5 focus:ring-1 focus:ring-blue-500" required>
+            <td class="p-3 relative">
+                <input type="text" name="item_description[]" class="w-full rounded border-gray-200 dark:border-gray-600 p-1.5 focus:ring-1 focus:ring-blue-500" required placeholder="ຄົ້ນຫາສິນຄ້າ...">
                 <input type="hidden" name="item_product_id[]" value="">
             </td>
             <td class="p-3">
-                <input type="number" step="any" name="item_quantity[]" value="1" class="qty-input w-full text-center rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5" min="1">
+                <input type="number" step="any" name="item_quantity[]" value="1" class="qty-input w-full text-center rounded border-gray-200 dark:border-gray-600 p-1.5" min="1">
             </td>
             <td class="p-3">
-                <input type="number" step="any" name="item_unit_price[]" value="0" class="price-input w-full text-right rounded border-gray-200 dark:border-gray-600 dark:bg-gray-700 p-1.5">
+                <input type="number" step="any" name="item_unit_price[]" value="0" class="price-input w-full text-right rounded border-gray-200 dark:border-gray-600 p-1.5">
             </td>
-            <td class="p-3 text-right font-medium text-gray-900 dark:text-white row-total">0</td>
+            <td class="p-3 text-right font-medium text-gray-900 row-total">0</td>
             <td class="p-3 text-center">
                 <button type="button" class="remove-row text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
             </td>
@@ -297,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         attachListeners(newRow);
     });
 
-    // Initialize
+    // Initialize existing rows
     document.querySelectorAll('#itemsTable tbody tr').forEach(attachListeners);
     calculateGrandTotal();
 });
