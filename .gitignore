@@ -7,6 +7,7 @@ __pycache__/
 *.log
 local_settings.py
 db.sqlite3-journal
+db.sqlite3
 debug_urls.py
 
 # Environment variables
