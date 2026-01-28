@@ -8,6 +8,7 @@ __pycache__/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+debug_urls.py
 
 # Environment variables
 .env
@@ -32,5 +33,6 @@ media/
 *.swo
 
 # Project specific
-*.pot
-*.pyc
+DEPLOYMENT.md
+QUICKSTART.md
+verify_data.py
